@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b0f1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TASKORA | منصة المهام والأرباح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0b0f1a;--bg2:#131829;--bg3:#1a2038;--bg4:#222845;
+--accent:#00d4aa;--accent2:#00ffcc;--accent-dim:rgba(0,212,170,.1);
+--indigo:#6366f1;--indigo-dim:rgba(99,102,241,.1);
+--danger:#ff4757;--warn:#ffb142;--success:#00d4aa;
+--text:#e8ecf4;--text2:#8892b0;--text3:#4a5578;
+--radius:16px;--radius-sm:12px;
+--shadow:0 8px 32px rgba(0,0,0,.4);
+--glass:rgba(19,24,41,.7);--glass-border:rgba(255,255,255,.06);
+--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;min-height:100dvh;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:inherit;border:none}
+input,select,textarea{font-family:inherit;-webkit-appearance:none;appearance:none}
+img{max-width:100%;display:block}
+ul{list-style:none}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:10px}
+
+/* ═══ Loading ═══ */
+#appLoader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity .5s}
+#appLoader.hide{opacity:0;pointer-events:none}
+.ld-logo{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ld-bar{width:120px;height:3px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.ld-bar span{display:block;height:100%;width:40%;background:var(--accent);border-radius:4px;animation:ldSlide 1s ease infinite}
+@keyframes ldSlide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+
+/* ═══ Toast ═══ */
+.toast-box{position:fixed;top:env(safe-area-inset-top,16px);left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;align-items:center;width:90%;max-width:380px;padding-top:8px}
+.toast{padding:12px 24px;border-radius:var(--radius-sm);font-size:.85rem;font-weight:600;color:#fff;animation:toastIn .35s;box-shadow:var(--shadow);width:100%;text-align:center}
+.toast-success{background:var(--accent);color:var(--bg)}
+.toast-error{background:var(--danger)}
+.toast-info{background:var(--indigo)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ Page transitions ═══ */
+.page{display:none;animation:pageIn .4s ease}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ Buttons ═══ */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:var(--radius-sm);font-size:.9rem;font-weight:700;transition:all .3s;-webkit-tap-highlight-color:transparent}
+.btn-accent{background:var(--accent);color:var(--bg)}
+.btn-accent:hover,.btn-accent:active{box-shadow:0 8px 30px rgba(0,212,170,.3);transform:translateY(-2px)}
+.btn-outline{background:transparent;border:1.5px solid rgba(0,212,170,.35);color:var(--accent)}
+.btn-outline:hover,.btn-outline:active{background:var(--accent-dim)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:9px 16px;font-size:.8rem}
+.btn-full{width:100%;justify-content:center}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ═══ Inputs ═══ */
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:5px}
+.input-wrap{position:relative}
+.input-wrap i{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.88rem;pointer-events:none}
+.input-wrap input,.input-wrap select,.input-wrap textarea{width:100%;padding:13px 14px 13px 14px;padding-right:42px;border-radius:var(--radius-sm);border:1.5px solid var(--glass-border);background:var(--bg);color:var(--text);font-size:.9rem;transition:border .3s}
+.input-wrap input:focus,.input-wrap select:focus,.input-wrap textarea:focus{outline:none;border-color:var(--accent)}
+
+/* ══════════════════════════════════════════
+          LANDING PAGE
+   ══════════════════════════════════════════ */
+
+.l-nav{position:fixed;top:0;right:0;left:0;z-index:100;padding:14px 0;transition:all .4s}
+.l-nav.scrolled{background:rgba(11,15,26,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 2px 20px rgba(0,0,0,.4)}
+.l-nav-inner{max-width:1200px;margin:auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between}
+.l-logo{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.l-logo span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.l-logo i{color:var(--accent);font-size:1rem}
+.l-nav-btns{display:flex;gap:10px;align-items:center}
+.l-nav-btns .btn{padding:9px 18px;font-size:.82rem}
+
+/* Hero */
+.hero-land{min-height:100vh;min-height:100dvh;display:flex;align-items:center;position:relative;overflow:hidden}
+.orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3;animation:orbFloat 14s ease-in-out infinite}
+.orb-1{width:300px;height:300px;background:var(--accent);top:-8%;right:-8%;animation-delay:0s}
+.orb-2{width:280px;height:280px;background:var(--indigo);bottom:-8%;left:-10%;animation-delay:-5s}
+.orb-3{width:200px;height:200px;background:#8b5cf6;top:45%;left:25%;animation-delay:-9s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(25px,-35px) scale(1.04)}50%{transform:translate(-18px,28px) scale(.96)}75%{transform:translate(35px,18px) scale(1.02)}}
+
+.hero-land-inner{position:relative;z-index:2;max-width:1200px;margin:auto;padding:120px 20px 60px;text-align:center}
+.hero-chip{display:inline-flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid rgba(0,212,170,.18);color:var(--accent);padding:7px 16px;border-radius:50px;font-size:.78rem;font-weight:600;margin-bottom:22px;animation:fadeUp .7s .2s both}
+.hero-chip i{font-size:.5rem}
+.hero-land h1{font-size:clamp(1.8rem,5vw,3.4rem);font-weight:900;line-height:1.2;margin-bottom:16px;animation:fadeUp .7s .4s both}
+.hero-land h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-land>div>p{font-size:clamp(.88rem,2.5vw,1.05rem);color:var(--text2);max-width:540px;margin:0 auto 32px;animation:fadeUp .7s .6s both}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeUp .7s .8s both}
+
+/* Hero Image */
+.hero-img{margin:48px auto 0;max-width:700px;animation:fadeUp .8s 1s both;position:relative}
+.hero-img img{border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);width:100%}
+.hero-img::after{content:'';position:absolute;inset:0;border-radius:20px;border:1px solid rgba(0,212,170,.1)}
+
+.hero-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;animation:fadeUp .7s 1.2s both;max-width:500px;margin-left:auto;margin-right:auto}
+.hs-item{text-align:center;background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px 12px}
+.hs-num{font-family:'Sora';font-size:clamp(1.2rem,3vw,1.7rem);font-weight:800;color:var(--accent)}
+.hs-lbl{font-size:.72rem;color:var(--text3);margin-top:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* Sections */
+.l-section{padding:70px 0}
+.l-container{max-width:1200px;margin:auto;padding:0 20px}
+.l-head{text-align:center;margin-bottom:40px}
+.l-head .chip{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.l-head .chip i{font-size:.45rem}
+.l-head h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800}
+.l-head p{color:var(--text2);max-width:460px;margin:8px auto 0;font-size:.88rem}
+
+/* Steps */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.step-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px 20px;text-align:center;transition:all .4s;position:relative;overflow:hidden}
+.step-card:hover{transform:translateY(-4px);border-color:rgba(0,212,170,.15);box-shadow:var(--shadow)}
+.step-img{width:100%;height:140px;border-radius:var(--radius-sm);overflow:hidden;margin-bottom:16px}
+.step-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.step-card:hover .step-img img{transform:scale(1.06)}
+.step-num{position:absolute;top:10px;left:14px;font-family:'Sora';font-size:2rem;font-weight:800;color:var(--bg3);line-height:1}
+.step-icon{width:48px;height:48px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.1rem;color:var(--accent);transition:all .3s}
+.step-card:hover .step-icon{background:var(--accent);color:var(--bg)}
+.step-card h3{font-size:.92rem;font-weight:700;margin-bottom:4px}
+.step-card p{font-size:.8rem;color:var(--text2)}
+
+/* Features */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.feat-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px 20px;transition:all .4s;display:flex;gap:16px;align-items:flex-start}
+.feat-card:hover{border-color:rgba(0,212,170,.12);transform:translateY(-3px)}
+.feat-icon-box{width:48px;height:48px;min-width:48px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent)}
+.feat-card h3{font-size:.9rem;font-weight:700;margin-bottom:3px}
+.feat-card p{font-size:.8rem;color:var(--text2)}
+
+/* Testimonials */
+.test-section{overflow:hidden}
+.test-scroll{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px 20px 20px;scrollbar-width:none}
+.test-scroll::-webkit-scrollbar{display:none}
+.test-card{min-width:280px;max-width:320px;scroll-snap-align:start;background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:22px;flex-shrink:0}
+.test-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.test-avatar{width:44px;height:44px;border-radius:12px;object-fit:cover;border:2px solid rgba(0,212,170,.2)}
+.test-name{font-size:.88rem;font-weight:700}
+.test-role{font-size:.72rem;color:var(--text3)}
+.test-stars{display:flex;gap:2px;margin-bottom:10px}
+.test-stars i{color:var(--accent);font-size:.75rem}
+.test-text{font-size:.82rem;color:var(--text2);line-height:1.8}
+
+/* CTA Banner */
+.cta-banner{background:var(--bg2);border:1px solid var(--glass-border);border-radius:20px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;min-height:280px}
+.cta-text{padding:40px 32px;display:flex;flex-direction:column;justify-content:center}
+.cta-text h2{font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:800;margin-bottom:10px}
+.cta-text p{font-size:.88rem;color:var(--text2);margin-bottom:24px}
+.cta-img{position:relative;overflow:hidden}
+.cta-img img{width:100%;height:100%;object-fit:cover;opacity:.7}
+
+/* Footer */
+.l-footer{border-top:1px solid var(--glass-border);padding:24px 0;text-align:center}
+.l-footer p{font-size:.78rem;color:var(--text3)}
+.l-footer-links{display:flex;justify-content:center;gap:20px;margin-bottom:10px}
+.l-footer-links a{width:36px;height:36px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:.88rem;transition:all .3s}
+.l-footer-links a:hover{background:var(--accent);color:var(--bg)}
+
+/* ══════════════════════════════════════════
+          AUTH PAGES
+   ══════════════════════════════════════════ */
+.auth-page{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:32px 16px}
+.auth-orbs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.auth-card{position:relative;z-index:2;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:20px;padding:32px 24px;width:100%;max-width:400px;box-shadow:var(--shadow)}
+.auth-card .l-logo{justify-content:center;margin-bottom:6px;font-size:1.4rem}
+.auth-card h2{text-align:center;font-size:1.05rem;font-weight:700;margin-bottom:4px}
+.auth-card .sub{text-align:center;font-size:.8rem;color:var(--text2);margin-bottom:24px}
+.auth-footer{text-align:center;margin-top:16px;font-size:.8rem;color:var(--text2)}
+.auth-footer a{color:var(--accent);font-weight:600}
+.auth-divider{text-align:center;margin:16px 0;position:relative}
+.auth-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--glass-border)}
+.auth-divider span{position:relative;background:var(--bg2);padding:0 12px;font-size:.75rem;color:var(--text3)}
+
+/* ══════════════════════════════════════════
+          DASHBOARD
+   ══════════════════════════════════════════ */
+.dash{display:none;min-height:100vh;min-height:100dvh}
+.dash.active{display:flex}
+
+/* Sidebar */
+.sidebar{width:260px;background:var(--bg2);border-left:1px solid var(--glass-border);padding:20px 0;display:flex;flex-direction:column;position:fixed;top:0;right:0;bottom:0;z-index:50;transition:transform .35s cubic-bezier(.22,1,.36,1);overflow-y:auto}
+.sb-logo{padding:0 20px 20px;border-bottom:1px solid var(--glass-border);margin-bottom:8px}
+.sb-logo .l-logo{font-size:1.1rem}
+.sb-role{font-size:.7rem;color:var(--text3);display:block;margin-top:3px}
+.sb-nav{flex:1;padding:6px 10px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:var(--radius-sm);font-size:.86rem;font-weight:600;color:var(--text2);transition:all .25s;margin-bottom:2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sb-link:hover,.sb-link:active{color:var(--text);background:var(--bg3)}
+.sb-link.active{color:var(--accent);background:var(--accent-dim)}
+.sb-link i{font-size:.9rem;width:20px;text-align:center}
+.sb-bottom{padding:10px;border-top:1px solid var(--glass-border)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg)}
+.sb-avatar{width:36px;height:36px;border-radius:10px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:800;font-size:.82rem}
+.sb-uname{font-size:.82rem;font-weight:600}
+.sb-uemail{font-size:.68rem;color:var(--text3)}
+.sb-logout{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:var(--radius-sm);background:none;color:var(--danger);font-size:.82rem;font-weight:600;margin-top:6px;transition:background .3s;-webkit-tap-highlight-color:transparent}
+.sb-logout:hover{background:rgba(255,71,87,.08)}
+
+/* Main area */
+.dash-main{flex:1;margin-right:260px;padding:24px 20px;padding-bottom:calc(24px + var(--safe-bottom));min-height:100vh}
+.dash-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.dash-topbar h1{font-size:1.2rem;font-weight:800}
+.dash-topbar-left{display:flex;align-items:center;gap:10px}
+.sb-toggle{display:none;background:none;color:var(--text);font-size:1.3rem;-webkit-tap-highlight-color:transparent;padding:4px}
+
+/* Stat cards */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px;transition:all .3s}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sc-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.sc-icon.teal{background:var(--accent-dim);color:var(--accent)}
+.sc-icon.indigo{background:var(--indigo-dim);color:var(--indigo)}
+.sc-icon.warn{background:rgba(255,177,66,.1);color:var(--warn)}
+.sc-icon.red{background:rgba(255,71,87,.1);color:var(--danger)}
+.sc-num{font-family:'Sora';font-size:1.35rem;font-weight:800}
+.sc-label{font-size:.75rem;color:var(--text2);margin-top:2px}
+
+/* Tables */
+.d-table-wrap{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.d-table-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--glass-border)}
+.d-table-head h3{font-size:.9rem;font-weight:700}
+.d-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.d-table{width:100%;border-collapse:collapse;min-width:480px}
+.d-table th{padding:11px 16px;font-size:.75rem;font-weight:700;color:var(--text3);text-align:right;background:var(--bg);border-bottom:1px solid var(--glass-border);white-space:nowrap}
+.d-table td{padding:11px 16px;font-size:.82rem;border-bottom:1px solid var(--glass-border);white-space:nowrap}
+.d-table tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700}
+.badge-success{background:rgba(0,212,170,.1);color:var(--accent)}
+.badge-warn{background:rgba(255,177,66,.1);color:var(--warn)}
+.badge-danger{background:rgba(255,71,87,.1);color:var(--danger)}
+.badge-info{background:var(--indigo-dim);color:var(--indigo)}
+
+/* Task cards */
+.tasks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.task-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;transition:all .35s}
+.task-card:hover{border-color:rgba(0,212,170,.15);transform:translateY(-3px);box-shadow:var(--shadow)}
+.tc-img{height:120px;overflow:hidden;position:relative}
+.tc-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.task-card:hover .tc-img img{transform:scale(1.06)}
+.tc-reward-badge{position:absolute;top:10px;left:10px;background:rgba(0,212,170,.9);color:var(--bg);font-family:'Sora';font-weight:800;font-size:.82rem;padding:5px 14px;border-radius:8px}
+.tc-body{padding:16px}
+.tc-title{font-size:.9rem;font-weight:700;margin-bottom:5px}
+.tc-desc{font-size:.78rem;color:var(--text2);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tc-footer{display:flex;align-items:center;justify-content:space-between}
+.tc-meta{font-size:.72rem;color:var(--text3);display:flex;align-items:center;gap:5px}
+
+/* Withdraw & Account forms */
+.form-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px 20px;max-width:500px}
+.form-card h3{font-size:.95rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.form-card h3 i{color:var(--accent)}
+
+/* Account */
+.acc-avatar-row{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+.acc-avatar-big{width:56px;height:56px;border-radius:14px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:var(--accent)}
+
+/* Dash view sections */
+.dash-view{display:none;animation:pageIn .3s ease}
+.dash-view.active{display:block}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 16px;color:var(--text3)}
+.empty-state i{font-size:2.2rem;margin-bottom:12px;display:block;color:var(--bg4)}
+.empty-state p{font-size:.88rem}
+
+/* Overlay */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;-webkit-tap-highlight-color:transparent}
+
+/* ═══ Mobile Bottom Nav (for dashboard) ═══ */
+.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--glass-border);padding:6px 8px;padding-bottom:calc(6px + var(--safe-bottom));z-index:90;justify-content:space-around}
+.mob-bottom-nav button{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;color:var(--text3);font-size:.62rem;font-weight:600;padding:6px 4px;-webkit-tap-highlight-color:transparent;transition:color .2s;min-width:0;flex:1}
+.mob-bottom-nav button i{font-size:1.1rem}
+.mob-bottom-nav button.active{color:var(--accent)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .sidebar{transform:translateX(100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sb-overlay.open{display:block}
+  .dash-main{margin-right:0;padding-bottom:calc(72px + var(--safe-bottom))}
+  .sb-toggle{display:block}
+  .mob-bottom-nav{display:flex}
+  .cta-banner{grid-template-columns:1fr}
+  .cta-img{height:180px}
+}
+@media(max-width:500px){
+  .stat-cards{grid-template-columns:repeat(2,1fr)}
+  .tasks-grid{grid-template-columns:1fr}
+  .auth-card{padding:24px 18px;border-radius:16px}
+  .hero-land-inner{padding:110px 16px 40px}
+  .hero-stats-row{grid-template-columns:repeat(3,1fr);gap:10px}
+  .hs-item{padding:14px 8px}
+  .steps-grid{grid-template-columns:1fr 1fr}
+  .feat-grid{grid-template-columns:1fr}
+}
+@media(max-width:370px){
+  .steps-grid{grid-template-columns:1fr}
+  .stat-cards{grid-template-columns:1fr}
+  .hero-stats-row{grid-template-columns:1fr}
+}
+
+/* ═══ Scroll Reveal with stagger ═══ */
+.rv{opacity:0;transform:translateY(32px);transition:all .65s cubic-bezier(.22,1,.36,1)}
+.rv.show{opacity:1;transform:translateY(0)}
+.rv-right{opacity:0;transform:translateX(50px);transition:all .65s cubic-bezier(.22,1,.36,1)}
+.rv-right.show{opacity:1;transform:translateX(0)}
+.rv-left{opacity:0;transform:translateX(-50px);transition:all .65s cubic-bezier(.22,1,.36,1)}
+.rv-left.show{opacity:1;transform:translateX(0)}
+.rv-scale{opacity:0;transform:scale(.85);transition:all .6s cubic-bezier(.22,1,.36,1)}
+.rv-scale.show{opacity:1;transform:scale(1)}
+.rv-flip{opacity:0;transform:perspective(600px) rotateX(15deg);transition:all .7s cubic-bezier(.22,1,.36,1)}
+.rv-flip.show{opacity:1;transform:perspective(600px) rotateX(0)}
+
+/* ═══ Particles canvas ═══ */
+#particlesCanvas{position:absolute;inset:0;z-index:1;pointer-events:none}
+
+/* ═══ Scroll Progress Bar ═══ */
+.scroll-progress{position:fixed;top:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--indigo));z-index:9999;transition:width .1s linear;width:0;border-radius:0 0 0 2px}
+
+/* ═══ Floating Glow behind hero text ═══ */
+.hero-glow{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(0,212,170,.12) 0%,transparent 70%);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;animation:glowPulse 4s ease-in-out infinite;z-index:0}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+
+/* ═══ Hero text shimmer ═══ */
+.shimmer{position:relative;overflow:hidden}
+.shimmer::after{content:'';position:absolute;top:0;right:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:shimmerSlide 4s ease-in-out infinite}
+@keyframes shimmerSlide{0%{right:-100%}50%{right:150%}100%{right:150%}}
+
+/* ═══ Typewriter cursor ═══ */
+.typewriter-cursor{display:inline-block;width:3px;height:1em;background:var(--accent);margin-right:4px;animation:blink .7s step-end infinite;vertical-align:text-bottom}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ═══ Magnetic button ═══ */
+.btn-magnetic{transition:transform .2s ease-out}
+
+/* ═══ Ripple effect ═══ */
+.ripple-wrap{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:rippleAnim .6s ease-out forwards;pointer-events:none}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+
+/* ═══ Card 3D tilt ═══ */
+.tilt-card{transition:transform .25s ease-out,box-shadow .25s ease-out}
+
+/* ═══ Confetti ═══ */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:99999;overflow:hidden}
+.confetti-piece{position:absolute;width:10px;height:10px;top:-20px;animation:confettiFall 2.5s ease-in forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}80%{opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(.3);opacity:0}}
+
+/* ═══ Counter pop animation ═══ */
+.counter-pop{animation:counterPop .4s cubic-bezier(.22,1,.36,1)}
+@keyframes counterPop{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* ═══ Floating badges ═══ */
+.float-badge{animation:floatY 3s ease-in-out infinite}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ═══ Stagger cascade for grid children ═══ */
+.stagger-grid>.rv:nth-child(1){transition-delay:.05s}
+.stagger-grid>.rv:nth-child(2){transition-delay:.12s}
+.stagger-grid>.rv:nth-child(3){transition-delay:.19s}
+.stagger-grid>.rv:nth-child(4){transition-delay:.26s}
+.stagger-grid>.rv:nth-child(5){transition-delay:.33s}
+.stagger-grid>.rv:nth-child(6){transition-delay:.4s}
+
+/* ═══ Smooth stat card number transitions ═══ */
+.sc-num{transition:transform .3s,color .3s}
+
+/* ═══ Task complete flash ═══ */
+@keyframes taskFlash{0%{box-shadow:0 0 0 0 rgba(0,212,170,.5)}50%{box-shadow:0 0 30px 10px rgba(0,212,170,.15)}100%{box-shadow:0 0 0 0 transparent}}
+.task-flash{animation:taskFlash .6s ease-out}
+
+/* ═══ Navbar glassmorphism reveal ═══ */
+.l-nav{backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0)}
+.l-nav.scrolled{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+
+/* ═══ Auth card entrance ═══ */
+.auth-card{animation:authEnter .6s cubic-bezier(.22,1,.36,1)}
+@keyframes authEnter{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* ═══ Input focus glow ═══ */
+.input-wrap input:focus,.input-wrap select:focus{box-shadow:0 0 0 3px rgba(0,212,170,.12)}
+.input-wrap i{transition:color .3s}
+.input-wrap input:focus~i,.input-wrap input:focus+i{color:var(--accent)}
+
+/* ═══ Dashboard view slide transitions ═══ */
+.dash-view{animation:none}
+.dash-view.active{animation:viewSlide .35s cubic-bezier(.22,1,.36,1)}
+@keyframes viewSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ═══ Sidebar link active indicator ═══ */
+.sb-link{position:relative}
+.sb-link.active::before{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 4px 4px 0}
+
+/* ═══ Mobile bottom nav active dot ═══ */
+.mob-bottom-nav button.active::after{content:'';display:block;width:4px;height:4px;border-radius:50%;background:var(--accent);margin-top:2px}
+
+/* ═══ Toast enhanced ═══ */
+.toast{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+
+/* ═══ Smooth hover for all interactive cards ═══ */
+.stat-card,.feat-card,.step-card,.test-card{will-change:transform}
+
+/* ═══ Reduced motion respect ═══ */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .orb,.confetti-piece{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="appLoader"><div class="ld-logo">TASKORA</div><div class="ld-bar"><span></span></div></div>
+
+<!-- Scroll Progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Toast -->
+<div class="toast-box" id="toastBox"></div>
+
+<!-- ═══════════════════ LANDING ═══════════════════ -->
+<div class="page active" id="pageLanding">
+<nav class="l-nav" id="lNav">
+  <div class="l-nav-inner">
+    <a href="#" class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></a>
+    <div class="l-nav-btns">
+      <button class="btn btn-outline btn-sm" onclick="showPage('pageLogin')"><i class="fa-solid fa-arrow-right-to-bracket"></i> دخول</button>
+      <button class="btn btn-accent btn-sm" onclick="showPage('pageRegister')"><i class="fa-solid fa-user-plus"></i> تسجيل</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-land" id="heroSection">
+  <div class="orbs" id="orbsContainer"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+  <canvas id="particlesCanvas"></canvas>
+  <div class="hero-land-inner" style="position:relative">
+    <div class="hero-glow"></div>
+    <div class="hero-chip"><i class="fa-solid fa-circle"></i> منصة المهام الأولى عربياً</div>
+    <h1 class="shimmer">أكمل المهام<br>واكسب <em>أرباحاً حقيقية</em></h1>
+    <p>سجّل حسابك، أكمل المهام المتاحة يومياً، واسحب أرباحك بسهولة. آلاف المستخدمين يكسبون معنا كل يوم.</p>
+    <div class="hero-btns">
+      <button class="btn btn-accent btn-magnetic ripple-wrap" onclick="showPage('pageRegister')"><i class="fa-solid fa-rocket"></i> ابدأ الآن مجاناً</button>
+      <button class="btn btn-outline btn-magnetic ripple-wrap" onclick="document.getElementById('howSection').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-circle-play"></i> كيف تعمل؟</button>
+    </div>
+    <div class="hero-img">
+      <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80" alt="فريق عمل">
+    </div>
+    <div class="hero-stats-row">
+      <div class="hs-item"><div class="hs-num">24K+</div><div class="hs-lbl">مستخدم نشط</div></div>
+      <div class="hs-item"><div class="hs-num">$180K</div><div class="hs-lbl">تم سحبها</div></div>
+      <div class="hs-item"><div class="hs-num">50+</div><div class="hs-lbl">مهمة يومية</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="l-section" id="howSection">
+  <div class="l-container">
+    <div class="l-head rv">
+      <div class="chip"><i class="fa-solid fa-circle"></i> كيف تعمل المنصة</div>
+      <h2>ثلاث خطوات فقط</h2>
+      <p>ابدأ رحلتك في الربح خلال دقائق</p>
+    </div>
+    <div class="steps-grid stagger-grid">
+      <div class="step-card rv tilt-card">
+        <span class="step-num">01</span>
+        <div class="step-img"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80" alt="تسجيل"></div>
+        <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
+        <h3>أنشئ حسابك</h3><p>سجّل مجاناً خلال ثوانٍ بالاسم والبريد</p>
+      </div>
+      <div class="step-card rv tilt-card">
+        <span class="step-num">02</span>
+        <div class="step-img"><img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&q=80" alt="مهام"></div>
+        <div class="step-icon"><i class="fa-solid fa-list-check"></i></div>
+        <h3>أكمل المهام</h3><p>تصفّح وأكمل المهام المتاحة يومياً</p>
+      </div>
+      <div class="step-card rv tilt-card">
+        <span class="step-num">03</span>
+        <div class="step-img"><img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&q=80" alt="أرباح"></div>
+        <div class="step-icon"><i class="fa-solid fa-wallet"></i></div>
+        <h3>اسحب أرباحك</h3><p>حوّل رصيدك لأموال حقيقية بسهولة</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="l-section" style="background:rgba(255,255,255,.01)">
+  <div class="l-container">
+    <div class="l-head rv">
+      <div class="chip"><i class="fa-solid fa-circle"></i> لماذا تاسكورا؟</div>
+      <h2>مميزات المنصة</h2>
+    </div>
+    <div class="feat-grid stagger-grid">
+      <div class="feat-card rv tilt-card"><div class="feat-icon-box"><i class="fa-solid fa-shield-halved"></i></div><div><h3>آمنة وموثوقة</h3><p>بياناتك محمية بأعلى معايير التشفير</p></div></div>
+      <div class="feat-card rv"><div class="feat-icon-box"><i class="fa-solid fa-money-bill-transfer"></i></div><div><h3>سحب فوري</h3><p>اسحب أرباحك خلال 24 ساعة فقط</p></div></div>
+      <div class="feat-card rv"><div class="feat-icon-box"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h3>مهام يومية</h3><p>مهام جديدة تُضاف يومياً لدخل مستمر</p></div></div>
+      <div class="feat-card rv"><div class="feat-icon-box"><i class="fa-solid fa-headset"></i></div><div><h3>دعم متواصل</h3><p>فريق الدعم متاح على مدار الساعة</p></div></div>
+      <div class="feat-card rv"><div class="feat-icon-box"><i class="fa-solid fa-mobile-screen"></i></div><div><h3>متوافق مع الهاتف</h3><p>استخدم المنصة بسلاسة من أي جهاز</p></div></div>
+      <div class="feat-card rv"><div class="feat-icon-box"><i class="fa-solid fa-users"></i></div><div><h3>مجتمع نشط</h3><p>انضم لآلاف المستخدمين حول العالم العربي</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="l-section test-section">
+  <div class="l-container">
+    <div class="l-head rv">
+      <div class="chip"><i class="fa-solid fa-circle"></i> آراء المستخدمين</div>
+      <h2>ماذا يقولون عنّا؟</h2>
+    </div>
+  </div>
+  <div class="test-scroll">
+    <div class="test-card">
+      <div class="test-top"><img class="test-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt=""><div><div class="test-name">محمد علي</div><div class="test-role">مستخدم منذ 3 أشهر</div></div></div>
+      <div class="test-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+      <p class="test-text">منصة ممتازة! سحبت أرباحي خلال ساعات. المهام سهلة ومتنوعة والأرباح حقيقية.</p>
+    </div>
+    <div class="test-card">
+      <div class="test-top"><img class="test-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80" alt=""><div><div class="test-name">فاطمة أحمد</div><div class="test-role">مستخدمة منذ 6 أشهر</div></div></div>
+      <div class="test-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+      <p class="test-text">أفضل منصة مهام تعاملت معها. الدعم سريع والسحب مضمون. أنصح الجميع بتجربتها.</p>
+    </div>
+    <div class="test-card">
+      <div class="test-top"><img class="test-avatar" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" alt=""><div><div class="test-name">عمر حسين</div><div class="test-role">مستخدم منذ شهرين</div></div></div>
+      <div class="test-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
+      <p class="test-text">بدأت كتجربة والآن أكسب يومياً. واجهة سهلة وسلسة حتى على الهاتف.</p>
+    </div>
+    <div class="test-card">
+      <div class="test-top"><img class="test-avatar" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" alt=""><div><div class="test-name">نور سعيد</div><div class="test-role">مستخدمة منذ 4 أشهر</div></div></div>
+      <div class="test-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+      <p class="test-text">تجربة رائعة ومختلفة. المهام بسيطة والمكافآت تصل بسرعة. شكراً تاسكورا!</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="l-section">
+  <div class="l-container">
+    <div class="cta-banner rv">
+      <div class="cta-text">
+        <h2><i class="fa-solid fa-rocket" style="color:var(--accent);margin-left:8px"></i> جاهز تبدأ رحلتك؟</h2>
+        <p>انضم الآن لأكثر من 24,000 مستخدم يكسبون يومياً من إكمال المهام البسيطة</p>
+        <div><button class="btn btn-accent" onclick="showPage('pageRegister')"><i class="fa-solid fa-user-plus"></i> سجّل مجاناً الآن</button></div>
+      </div>
+      <div class="cta-img"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80" alt="مجتمع"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="l-footer">
+  <div class="l-container">
+    <div class="l-footer-links">
+      <a href="#"><i class="fa-brands fa-telegram"></i></a>
+      <a href="#"><i class="fa-brands fa-instagram"></i></a>
+      <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+      <a href="#"><i class="fa-brands fa-youtube"></i></a>
+    </div>
+    <p>&copy; 2026 TASKORA — جميع الحقوق محفوظة</p>
+  </div>
+</footer>
+</div>
+
+<!-- ═══════════════════ REGISTER ═══════════════════ -->
+<div class="page" id="pageRegister">
+  <div class="auth-page">
+    <div class="auth-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+    <div class="auth-card">
+      <div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div>
+      <h2>إنشاء حساب جديد</h2>
+      <p class="sub">أنشئ حسابك وابدأ بكسب الأرباح</p>
+      <div class="input-group"><label>الاسم الكامل</label><div class="input-wrap"><i class="fa-solid fa-user"></i><input type="text" id="regName" placeholder="أدخل اسمك الكامل"></div></div>
+      <div class="input-group"><label>البريد الإلكتروني</label><div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="regEmail" placeholder="example@mail.com" dir="ltr"></div></div>
+      <div class="input-group"><label>كلمة المرور</label><div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="regPass" placeholder="6 أحرف على الأقل" dir="ltr"></div></div>
+      <div class="input-group"><label>تأكيد كلمة المرور</label><div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="regPass2" placeholder="أعد كتابة كلمة المرور" dir="ltr"></div></div>
+      <button class="btn btn-accent btn-full" onclick="doRegister()"><i class="fa-solid fa-user-plus"></i> إنشاء الحساب</button>
+      <div class="auth-footer">لديك حساب؟ <a href="#" onclick="showPage('pageLogin');return false">تسجيل دخول</a></div>
+      <p style="text-align:center;margin-top:14px"><a href="#" onclick="showPage('pageLanding');return false" style="font-size:.78rem;color:var(--text3)"><i class="fa-solid fa-arrow-right" style="margin-left:4px"></i> العودة للرئيسية</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LOGIN ═══════════════════ -->
+<div class="page" id="pageLogin">
+  <div class="auth-page">
+    <div class="auth-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+    <div class="auth-card">
+      <div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div>
+      <h2>تسجيل الدخول</h2>
+      <p class="sub">أدخل بياناتك للوصول إلى لوحتك</p>
+      <div class="input-group"><label>البريد الإلكتروني</label><div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="logEmail" placeholder="example@mail.com" dir="ltr"></div></div>
+      <div class="input-group"><label>كلمة المرور</label><div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="logPass" placeholder="••••••••" dir="ltr"></div></div>
+      <button class="btn btn-accent btn-full" onclick="doLogin()"><i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول</button>
+      <div class="auth-footer">ليس لديك حساب؟ <a href="#" onclick="showPage('pageRegister');return false">إنشاء حساب</a></div>
+      <div class="auth-divider"><span>أو</span></div>
+      <button class="btn btn-outline btn-full btn-sm" onclick="loginAdmin()" style="font-size:.8rem"><i class="fa-solid fa-user-shield"></i> دخول كمسؤول (تجريبي)</button>
+      <p style="text-align:center;margin-top:14px"><a href="#" onclick="showPage('pageLanding');return false" style="font-size:.78rem;color:var(--text3)"><i class="fa-solid fa-arrow-right" style="margin-left:4px"></i> العودة للرئيسية</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ USER DASHBOARD ═══════════════════ -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<div class="dash" id="dashUser">
+  <aside class="sidebar" id="sidebarUser">
+    <div class="sb-logo"><div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div><span class="sb-role">لوحة المستخدم</span></div>
+    <div class="sb-nav">
+      <div class="sb-link active" data-view="uTasks" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-list-check"></i> المهام</div>
+      <div class="sb-link" data-view="uBalance" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-wallet"></i> رصيدي</div>
+      <div class="sb-link" data-view="uEarnings" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-chart-line"></i> سجل الأرباح</div>
+      <div class="sb-link" data-view="uWithdraw" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-money-bill-transfer"></i> السحب</div>
+      <div class="sb-link" data-view="uAccount" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-gear"></i> الحساب</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user"><div class="sb-avatar" id="uAvatarSB">U</div><div><div class="sb-uname" id="uNameSB">المستخدم</div><div class="sb-uemail" id="uEmailSB">user@mail.com</div></div></div>
+      <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> تسجيل خروج</button>
+    </div>
+  </aside>
+
+  <!-- Mobile Bottom Nav - User -->
+  <div class="mob-bottom-nav" id="mobNavUser">
+    <button class="active" data-view="uTasks" onclick="mobSwitch(this,'dashUser')"><i class="fa-solid fa-list-check"></i>المهام</button>
+    <button data-view="uBalance" onclick="mobSwitch(this,'dashUser')"><i class="fa-solid fa-wallet"></i>رصيدي</button>
+    <button data-view="uEarnings" onclick="mobSwitch(this,'dashUser')"><i class="fa-solid fa-chart-line"></i>الأرباح</button>
+    <button data-view="uWithdraw" onclick="mobSwitch(this,'dashUser')"><i class="fa-solid fa-money-bill-transfer"></i>السحب</button>
+    <button data-view="uAccount" onclick="mobSwitch(this,'dashUser')"><i class="fa-solid fa-gear"></i>حسابي</button>
+  </div>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left"><button class="sb-toggle" onclick="toggleSidebar('sidebarUser')"><i class="fa-solid fa-bars"></i></button><h1 id="uViewTitle">المهام المتاحة</h1></div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="dash-view active" id="uTasks">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-list-check"></i></div></div><div class="sc-num" id="uTotalTasks">0</div><div class="sc-label">متاحة</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon indigo"><i class="fa-solid fa-circle-check"></i></div></div><div class="sc-num" id="uDoneTasks">0</div><div class="sc-label">مكتملة</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon warn"><i class="fa-solid fa-wallet"></i></div></div><div class="sc-num" id="uBalHead">$0</div><div class="sc-label">رصيدك</div></div>
+      </div>
+      <div class="tasks-grid" id="userTasksList"></div>
+    </div>
+
+    <!-- Balance -->
+    <div class="dash-view" id="uBalance">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-wallet"></i></div></div><div class="sc-num" id="uBalVal">$0</div><div class="sc-label">الرصيد المتاح</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon warn"><i class="fa-solid fa-clock-rotate-left"></i></div></div><div class="sc-num" id="uPendVal">$0</div><div class="sc-label">قيد السحب</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon indigo"><i class="fa-solid fa-arrow-down"></i></div></div><div class="sc-num" id="uTotalEarned">$0</div><div class="sc-label">إجمالي الأرباح</div></div>
+      </div>
+    </div>
+
+    <!-- Earnings -->
+    <div class="dash-view" id="uEarnings">
+      <div class="d-table-wrap"><div class="d-table-head"><h3>سجل الأرباح</h3></div>
+        <div class="d-table-scroll"><table class="d-table"><thead><tr><th>المهمة</th><th>المبلغ</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody id="earningsBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- Withdraw -->
+    <div class="dash-view" id="uWithdraw">
+      <div class="form-card">
+        <h3><i class="fa-solid fa-money-bill-transfer"></i> طلب سحب</h3>
+        <div class="input-group"><label>المبلغ ($)</label><div class="input-wrap"><i class="fa-solid fa-dollar-sign"></i><input type="number" id="wdAmount" placeholder="الحد الأدنى $5" dir="ltr" min="5" inputmode="decimal"></div></div>
+        <div class="input-group"><label>طريقة الدفع</label><div class="input-wrap"><i class="fa-solid fa-credit-card"></i><select id="wdMethod"><option value="paypal">PayPal</option><option value="usdt">USDT (TRC20)</option><option value="zain">زين كاش</option><option value="bank">حوالة بنكية</option></select></div></div>
+        <div class="input-group"><label>رقم الحساب / المحفظة</label><div class="input-wrap"><i class="fa-solid fa-hashtag"></i><input type="text" id="wdAccount" placeholder="أدخل رقم الحساب" dir="ltr"></div></div>
+        <button class="btn btn-accent btn-full" onclick="doWithdraw()"><i class="fa-solid fa-paper-plane"></i> إرسال الطلب</button>
+      </div>
+      <div class="d-table-wrap" style="margin-top:20px"><div class="d-table-head"><h3>طلبات السحب السابقة</h3></div>
+        <div class="d-table-scroll"><table class="d-table"><thead><tr><th>المبلغ</th><th>الطريقة</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody id="wdHistBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- Account -->
+    <div class="dash-view" id="uAccount">
+      <div class="form-card" style="max-width:600px">
+        <div class="acc-avatar-row"><div class="acc-avatar-big" id="uAvatarBig">U</div><div><h3 id="uAccName" style="margin:0">المستخدم</h3><p style="font-size:.8rem;color:var(--text2);margin:0" id="uAccEmail">user@mail.com</p></div></div>
+        <div class="input-group"><label>الاسم</label><div class="input-wrap"><i class="fa-solid fa-user"></i><input type="text" id="accName"></div></div>
+        <div class="input-group"><label>البريد الإلكتروني</label><div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="accEmail" dir="ltr"></div></div>
+        <button class="btn btn-accent" onclick="saveAccount()"><i class="fa-solid fa-floppy-disk"></i> حفظ التغييرات</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════ ADMIN DASHBOARD ═══════════════════ -->
+<div class="dash" id="dashAdmin">
+  <aside class="sidebar" id="sidebarAdmin">
+    <div class="sb-logo"><div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div><span class="sb-role"><i class="fa-solid fa-shield-halved" style="color:var(--accent);margin-left:4px"></i> لوحة الإدارة</span></div>
+    <div class="sb-nav">
+      <div class="sb-link active" data-view="aUsers" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-users"></i> المستخدمون</div>
+      <div class="sb-link" data-view="aAddTask" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-plus-circle"></i> إضافة المهام</div>
+      <div class="sb-link" data-view="aCompleted" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-clipboard-check"></i> المكتملة</div>
+      <div class="sb-link" data-view="aBalances" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-coins"></i> الأرصدة</div>
+      <div class="sb-link" data-view="aWithdrawals" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-money-check-dollar"></i> طلبات السحب</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user"><div class="sb-avatar" style="background:var(--indigo-dim);color:var(--indigo)">A</div><div><div class="sb-uname">المسؤول</div><div class="sb-uemail">admin@taskora.com</div></div></div>
+      <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> تسجيل خروج</button>
+    </div>
+  </aside>
+
+  <!-- Mobile Bottom Nav - Admin -->
+  <div class="mob-bottom-nav" id="mobNavAdmin">
+    <button class="active" data-view="aUsers" onclick="mobSwitch(this,'dashAdmin')"><i class="fa-solid fa-users"></i>المستخدمون</button>
+    <button data-view="aAddTask" onclick="mobSwitch(this,'dashAdmin')"><i class="fa-solid fa-plus-circle"></i>إضافة</button>
+    <button data-view="aCompleted" onclick="mobSwitch(this,'dashAdmin')"><i class="fa-solid fa-clipboard-check"></i>المكتملة</button>
+    <button data-view="aBalances" onclick="mobSwitch(this,'dashAdmin')"><i class="fa-solid fa-coins"></i>الأرصدة</button>
+    <button data-view="aWithdrawals" onclick="mobSwitch(this,'dashAdmin')"><i class="fa-solid fa-money-check-dollar"></i>السحب</button>
+  </div>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left"><button class="sb-toggle" onclick="toggleSidebar('sidebarAdmin')"><i class="fa-solid fa-bars"></i></button><h1 id="aViewTitle">المستخدمون</h1></div>
+    </div>
+
+    <!-- Users -->
+    <div class="dash-view active" id="aUsers">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-users"></i></div></div><div class="sc-num" id="aTotalUsers">0</div><div class="sc-label">إجمالي المستخدمين</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon indigo"><i class="fa-solid fa-user-check"></i></div></div><div class="sc-num" id="aActiveUsers">0</div><div class="sc-label">نشط</div></div>
+      </div>
+      <div class="d-table-wrap"><div class="d-table-head"><h3>قائمة المستخدمين</h3></div>
+        <div class="d-table-scroll"><table class="d-table"><thead><tr><th>الاسم</th><th>البريد</th><th>الرصيد</th><th>المهام</th><th>إجراء</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- Add Task -->
+    <div class="dash-view" id="aAddTask">
+      <div class="form-card" style="max-width:600px">
+        <h3><i class="fa-solid fa-plus-circle"></i> إضافة مهمة جديدة</h3>
+        <div class="input-group"><label>عنوان المهمة</label><div class="input-wrap"><i class="fa-solid fa-heading"></i><input type="text" id="tTitle" placeholder="مثال: مشاهدة فيديو إعلاني"></div></div>
+        <div class="input-group"><label>وصف المهمة</label><div class="input-wrap"><i class="fa-solid fa-align-right"></i><input type="text" id="tDesc" placeholder="وصف مختصر للمهمة"></div></div>
+        <div class="input-group"><label>المكافأة ($)</label><div class="input-wrap"><i class="fa-solid fa-dollar-sign"></i><input type="number" id="tReward" placeholder="0.50" step="0.01" dir="ltr" inputmode="decimal"></div></div>
+        <div class="input-group"><label>رابط المهمة (اختياري)</label><div class="input-wrap"><i class="fa-solid fa-link"></i><input type="url" id="tLink" placeholder="https://..." dir="ltr"></div></div>
+        <button class="btn btn-accent btn-full" onclick="addTask()"><i class="fa-solid fa-plus"></i> إضافة المهمة</button>
+      </div>
+      <div class="d-table-wrap" style="margin-top:20px"><div class="d-table-head"><h3>المهام الحالية</h3></div>
+        <div class="d-table-scroll"><table class="d-table"><thead><tr><th>العنوان</th><th>المكافأة</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="adminTasksBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- Completed -->
+    <div class="dash-view" id="aCompleted">
+      <div class="d-table-wrap"><div class="d-table-head"><h3>المهام المكتملة</h3></div>
+        <div class="d-table-scroll"><table class="d-table"><thead><tr><th>المستخدم</th><th>المهمة</th><th>المكافأة</th><th>التاريخ</th></tr></thead><tbody id="adminCompBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- Balances -->
+    <div class="dash-view" id="aBalances">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-coins"></i></div></div><div class="sc-num" id="aTotalPaid">$0</div><div class="sc-label">إجمالي المدفوع</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon warn"><i class="fa-solid fa-hourglass-half"></i></div></div><div class="sc-num" id="aTotalPending">$0</div><div class="sc-label">قيد الانتظار</div></div>
+      </div>
+      <div class="d-table-wrap"><div class="d-table-head"><h3>أرصدة المستخدمين</h3></div>
+        <div class="d-table-scroll"><table class="d-table"><thead><tr><th>المستخدم</th><th>الرصيد</th><th>الأرباح</th><th>المسحوب</th></tr></thead><tbody id="adminBalBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- Withdrawals -->
+    <div class="dash-view" id="aWithdrawals">
+      <div class="d-table-wrap"><div class="d-table-head"><h3>طلبات السحب</h3></div>
+        <div class="d-table-scroll"><table class="d-table"><thead><tr><th>المستخدم</th><th>المبلغ</th><th>الطريقة</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="adminWdBody"></tbody></table></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ════════ DATA ════════ */
+const DB={
+  get(k){try{return JSON.parse(localStorage.getItem('tk_'+k))}catch{return null}},
+  set(k,v){localStorage.setItem('tk_'+k,JSON.stringify(v))},
+};
+
+const TASK_IMAGES=[
+  'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&q=80',
+  'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&q=80',
+  'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&q=80',
+  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80',
+  'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&q=80',
+  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80',
+  'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?w=400&q=80',
+  'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&q=80'
+];
+
+function initData(){
+  if(!DB.get('init')){
+    DB.set('users',[
+      {id:1,name:'أحمد خالد',email:'ahmed@test.com',pass:'123456',balance:12.50,totalEarned:42.50,pending:5,completedTasks:[1,2,3]},
+      {id:2,name:'سارة محمد',email:'sara@test.com',pass:'123456',balance:8.00,totalEarned:28.00,pending:0,completedTasks:[1,2]},
+      {id:3,name:'علي حسن',email:'ali@test.com',pass:'123456',balance:25.75,totalEarned:65.75,pending:10,completedTasks:[1,2,3,4]}
+    ]);
+    DB.set('tasks',[
+      {id:1,title:'مشاهدة فيديو إعلاني',desc:'شاهد الفيديو كاملاً حتى النهاية (30 ثانية)',reward:0.50,active:true},
+      {id:2,title:'تقييم تطبيق على المتجر',desc:'حمّل التطبيق واكتب تقييماً من 5 نجوم مع تعليق',reward:1.00,active:true},
+      {id:3,title:'متابعة حساب انستغرام',desc:'تابع الحساب المطلوب وأبقِ المتابعة 7 أيام',reward:0.75,active:true},
+      {id:4,title:'ملء استبيان قصير',desc:'أجب على 10 أسئلة في استبيان رأي المستهلك',reward:1.50,active:true},
+      {id:5,title:'مشاركة منشور فيسبوك',desc:'شارك المنشور على صفحتك واتركه 24 ساعة',reward:0.60,active:true}
+    ]);
+    DB.set('earnings',[
+      {userId:1,taskId:1,taskTitle:'مشاهدة فيديو إعلاني',amount:0.50,date:'2026-08-10',status:'مكتمل'},
+      {userId:1,taskId:2,taskTitle:'تقييم تطبيق على المتجر',amount:1.00,date:'2026-08-11',status:'مكتمل'},
+      {userId:1,taskId:3,taskTitle:'متابعة حساب انستغرام',amount:0.75,date:'2026-08-12',status:'مكتمل'},
+      {userId:2,taskId:1,taskTitle:'مشاهدة فيديو إعلاني',amount:0.50,date:'2026-08-11',status:'مكتمل'},
+      {userId:2,taskId:2,taskTitle:'تقييم تطبيق على المتجر',amount:1.00,date:'2026-08-13',status:'مكتمل'},
+      {userId:3,taskId:1,taskTitle:'مشاهدة فيديو إعلاني',amount:0.50,date:'2026-08-09',status:'مكتمل'},
+      {userId:3,taskId:2,taskTitle:'تقييم تطبيق على المتجر',amount:1.00,date:'2026-08-10',status:'مكتمل'},
+      {userId:3,taskId:3,taskTitle:'متابعة حساب انستغرام',amount:0.75,date:'2026-08-11',status:'مكتمل'},
+      {userId:3,taskId:4,taskTitle:'ملء استبيان قصير',amount:1.50,date:'2026-08-13',status:'مكتمل'}
+    ]);
+    DB.set('withdrawals',[
+      {id:1,userId:1,userName:'أحمد خالد',amount:25,method:'paypal',account:'ahmed@paypal.com',date:'2026-08-12',status:'مكتمل'},
+      {id:2,userId:3,userName:'علي حسن',amount:30,method:'usdt',account:'TRx...abc',date:'2026-08-13',status:'قيد المراجعة'},
+      {id:3,userId:1,userName:'أحمد خالد',amount:5,method:'zain',account:'07701234567',date:'2026-08-14',status:'قيد المراجعة'}
+    ]);
+    DB.set('nextUserId',4);DB.set('nextTaskId',6);DB.set('nextWdId',4);DB.set('init',true);
+  }
+}
+
+/* ════════ UI ════════ */
+function toast(msg,type='info'){
+  const box=document.getElementById('toastBox'),el=document.createElement('div');
+  el.className='toast toast-'+type;el.textContent=msg;box.appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+}
+
+function showPage(id){
+  document.querySelectorAll('.page,.dash').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');window.scrollTo(0,0);
+}
+
+const viewTitles={uTasks:'المهام المتاحة',uBalance:'رصيدي',uEarnings:'سجل الأرباح',uWithdraw:'السحب',uAccount:'الحساب',aUsers:'المستخدمون',aAddTask:'إضافة المهام',aCompleted:'المهام المكتملة',aBalances:'الأرصدة',aWithdrawals:'طلبات السحب'};
+
+function switchView(link,dashId){
+  const dash=document.getElementById(dashId);
+  dash.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  link.classList.add('active');
+  const viewId=link.dataset.view;
+  dash.querySelectorAll('.dash-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId)?.classList.add('active');
+  const titleEl=dashId==='dashUser'?'uViewTitle':'aViewTitle';
+  document.getElementById(titleEl).textContent=viewTitles[viewId]||'';
+  // sync mobile nav
+  const navId=dashId==='dashUser'?'mobNavUser':'mobNavAdmin';
+  document.querySelectorAll('#'+navId+' button').forEach(b=>{b.classList.toggle('active',b.dataset.view===viewId)});
+  closeSidebar();
+  if(dashId==='dashUser')refreshUserDash();else refreshAdminDash();
+}
+
+function mobSwitch(btn,dashId){
+  const dash=document.getElementById(dashId);
+  const viewId=btn.dataset.view;
+  // sync sidebar
+  dash.querySelectorAll('.sb-link').forEach(l=>{l.classList.toggle('active',l.dataset.view===viewId)});
+  // sync bottom nav
+  btn.closest('.mob-bottom-nav').querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  dash.querySelectorAll('.dash-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId)?.classList.add('active');
+  const titleEl=dashId==='dashUser'?'uViewTitle':'aViewTitle';
+  document.getElementById(titleEl).textContent=viewTitles[viewId]||'';
+  window.scrollTo(0,0);
+  if(dashId==='dashUser')refreshUserDash();else refreshAdminDash();
+}
+
+function toggleSidebar(id){document.getElementById(id).classList.toggle('open');document.getElementById('sbOverlay').classList.toggle('open')}
+function closeSidebar(){document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open'));document.getElementById('sbOverlay').classList.remove('open')}
+
+/* ════════ AUTH ════════ */
+let currentUser=null;
+
+function doRegister(){
+  const name=document.getElementById('regName').value.trim(),email=document.getElementById('regEmail').value.trim(),pass=document.getElementById('regPass').value,pass2=document.getElementById('regPass2').value;
+  if(!name||!email||!pass)return toast('جميع الحقول مطلوبة','error');
+  if(pass.length<6)return toast('كلمة المرور 6 أحرف على الأقل','error');
+  if(pass!==pass2)return toast('كلمتا المرور غير متطابقتين','error');
+  const users=DB.get('users')||[];
+  if(users.find(u=>u.email===email))return toast('البريد مسجّل مسبقاً','error');
+  let nid=DB.get('nextUserId')||users.length+1;
+  const user={id:nid,name,email,pass,balance:0,totalEarned:0,pending:0,completedTasks:[]};
+  users.push(user);DB.set('users',users);DB.set('nextUserId',nid+1);
+  toast('تم إنشاء الحساب بنجاح!','success');currentUser=user;openUserDash();
+}
+
+function doLogin(){
+  const email=document.getElementById('logEmail').value.trim(),pass=document.getElementById('logPass').value;
+  if(!email||!pass)return toast('أدخل البريد وكلمة المرور','error');
+  const users=DB.get('users')||[],user=users.find(u=>u.email===email&&u.pass===pass);
+  if(!user)return toast('بيانات الدخول غير صحيحة','error');
+  currentUser=user;toast('مرحباً '+user.name+'!','success');openUserDash();
+}
+
+function loginAdmin(){currentUser=null;showPage('dashAdmin');document.getElementById('dashAdmin').classList.add('active');refreshAdminDash();toast('مرحباً بك في لوحة الإدارة','success')}
+
+function doLogout(){currentUser=null;showPage('pageLanding');toast('تم تسجيل الخروج','info')}
+
+function openUserDash(){
+  showPage('dashUser');document.getElementById('dashUser').classList.add('active');
+  const ini=currentUser.name.charAt(0);
+  document.getElementById('uAvatarSB').textContent=ini;
+  document.getElementById('uNameSB').textContent=currentUser.name;
+  document.getElementById('uEmailSB').textContent=currentUser.email;
+  refreshUserDash();
+}
+
+/* ════════ USER LOGIC ════════ */
+function getUser(){if(!currentUser)return null;const users=DB.get('users')||[];return users.find(u=>u.id===currentUser.id)||currentUser}
+function saveUser(u){const users=DB.get('users')||[];const idx=users.findIndex(x=>x.id===u.id);if(idx>=0)users[idx]=u;DB.set('users',users);currentUser=u}
+
+function refreshUserDash(){
+  const u=getUser();if(!u)return;
+  const tasks=DB.get('tasks')||[],earnings=(DB.get('earnings')||[]).filter(e=>e.userId===u.id),wds=(DB.get('withdrawals')||[]).filter(w=>w.userId===u.id);
+  const available=tasks.filter(t=>t.active&&!u.completedTasks.includes(t.id));
+  document.getElementById('uTotalTasks').textContent=available.length;
+  document.getElementById('uDoneTasks').textContent=u.completedTasks.length;
+  document.getElementById('uBalHead').textContent='$'+u.balance.toFixed(2);
+  document.getElementById('uBalVal').textContent='$'+u.balance.toFixed(2);
+  document.getElementById('uPendVal').textContent='$'+u.pending.toFixed(2);
+  document.getElementById('uTotalEarned').textContent='$'+u.totalEarned.toFixed(2);
+
+  const tl=document.getElementById('userTasksList');
+  if(!available.length){tl.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-clipboard-check"></i><p>أكملت جميع المهام المتاحة!</p></div>'}
+  else{tl.innerHTML=available.map((t,i)=>`<div class="task-card tilt-card" style="animation:fadeUp .5s ${i*.1}s both"><div class="tc-img"><img src="${TASK_IMAGES[t.id%TASK_IMAGES.length]}" alt="${t.title}"><div class="tc-reward-badge float-badge">$${t.reward.toFixed(2)}</div></div><div class="tc-body"><div class="tc-title">${t.title}</div><div class="tc-desc">${t.desc}</div><div class="tc-footer"><span class="tc-meta"><i class="fa-solid fa-coins"></i> مكافأة فورية</span><button class="btn btn-accent btn-sm ripple-wrap" onclick="completeTask(${t.id})"><i class="fa-solid fa-check"></i> إكمال</button></div></div></div>`).join('');initTiltCards()}
+
+  const eb=document.getElementById('earningsBody');
+  eb.innerHTML=earnings.length?earnings.map(e=>`<tr><td>${e.taskTitle}</td><td style="color:var(--accent);font-weight:700">$${e.amount.toFixed(2)}</td><td>${e.date}</td><td><span class="badge badge-success">${e.status}</span></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:28px">لا توجد أرباح بعد</td></tr>';
+
+  const mMap={paypal:'PayPal',usdt:'USDT',zain:'زين كاش',bank:'حوالة بنكية'};
+  const wb=document.getElementById('wdHistBody');
+  wb.innerHTML=wds.length?wds.map(w=>{const bc=w.status==='مكتمل'?'badge-success':w.status==='مرفوض'?'badge-danger':'badge-warn';return`<tr><td style="font-weight:700">$${w.amount}</td><td>${mMap[w.method]||w.method}</td><td>${w.date}</td><td><span class="badge ${bc}">${w.status}</span></td></tr>`}).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:28px">لا توجد طلبات سحب</td></tr>';
+
+  document.getElementById('uAvatarBig').textContent=u.name.charAt(0);
+  document.getElementById('uAccName').textContent=u.name;
+  document.getElementById('uAccEmail').textContent=u.email;
+  document.getElementById('accName').value=u.name;
+  document.getElementById('accEmail').value=u.email;
+}
+
+function completeTask(tid){
+  const u=getUser();if(!u)return;
+  const tasks=DB.get('tasks')||[],task=tasks.find(t=>t.id===tid);if(!task)return;
+  u.completedTasks.push(tid);u.balance+=task.reward;u.totalEarned+=task.reward;saveUser(u);
+  const earnings=DB.get('earnings')||[];
+  earnings.push({userId:u.id,taskId:tid,taskTitle:task.title,amount:task.reward,date:new Date().toISOString().slice(0,10),status:'مكتمل'});
+  DB.set('earnings',earnings);toast('تم إكمال المهمة! +$'+task.reward.toFixed(2),'success');refreshUserDash();
+}
+
+function doWithdraw(){
+  const u=getUser();if(!u)return;
+  const amount=parseFloat(document.getElementById('wdAmount').value),method=document.getElementById('wdMethod').value,account=document.getElementById('wdAccount').value.trim();
+  if(!amount||amount<5)return toast('الحد الأدنى للسحب $5','error');
+  if(amount>u.balance)return toast('رصيدك غير كافٍ','error');
+  if(!account)return toast('أدخل رقم الحساب','error');
+  u.balance-=amount;u.pending+=amount;saveUser(u);
+  const wds=DB.get('withdrawals')||[];let nid=DB.get('nextWdId')||wds.length+1;
+  wds.push({id:nid,userId:u.id,userName:u.name,amount,method,account,date:new Date().toISOString().slice(0,10),status:'قيد المراجعة'});
+  DB.set('withdrawals',wds);DB.set('nextWdId',nid+1);
+  document.getElementById('wdAmount').value='';document.getElementById('wdAccount').value='';
+  toast('تم إرسال طلب السحب','success');refreshUserDash();
+}
+
+function saveAccount(){
+  const u=getUser();if(!u)return;
+  const name=document.getElementById('accName').value.trim(),email=document.getElementById('accEmail').value.trim();
+  if(!name||!email)return toast('جميع الحقول مطلوبة','error');
+  u.name=name;u.email=email;saveUser(u);
+  document.getElementById('uAvatarSB').textContent=name.charAt(0);
+  document.getElementById('uNameSB').textContent=name;document.getElementById('uEmailSB').textContent=email;
+  toast('تم حفظ التغييرات','success');refreshUserDash();
+}
+
+/* ════════ ADMIN LOGIC ════════ */
+function refreshAdminDash(){
+  const users=DB.get('users')||[],tasks=DB.get('tasks')||[],earnings=DB.get('earnings')||[],wds=DB.get('withdrawals')||[];
+  document.getElementById('aTotalUsers').textContent=users.length;
+  document.getElementById('aActiveUsers').textContent=users.filter(u=>u.completedTasks.length>0).length;
+  document.getElementById('adminUsersBody').innerHTML=users.map(u=>`<tr><td style="font-weight:600">${u.name}</td><td style="font-size:.8rem;color:var(--text2)">${u.email}</td><td style="color:var(--accent);font-weight:700">$${u.balance.toFixed(2)}</td><td>${u.completedTasks.length}</td><td><button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:28px">لا يوجد مستخدمون</td></tr>';
+  document.getElementById('adminTasksBody').innerHTML=tasks.map(t=>`<tr><td style="font-weight:600">${t.title}</td><td style="color:var(--accent);font-weight:700">$${t.reward.toFixed(2)}</td><td><span class="badge ${t.active?'badge-success':'badge-danger'}">${t.active?'مفعّلة':'معطّلة'}</span></td><td style="white-space:nowrap"><button class="btn btn-outline btn-sm" onclick="toggleTask(${t.id})" style="margin-left:4px"><i class="fa-solid fa-${t.active?'pause':'play'}"></i></button><button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+  document.getElementById('adminCompBody').innerHTML=earnings.map(e=>{const usr=users.find(u=>u.id===e.userId);return`<tr><td>${usr?usr.name:'محذوف'}</td><td>${e.taskTitle}</td><td style="color:var(--accent);font-weight:700">$${e.amount.toFixed(2)}</td><td>${e.date}</td></tr>`}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:28px">لا توجد مهام مكتملة</td></tr>';
+  const totalPaid=wds.filter(w=>w.status==='مكتمل').reduce((s,w)=>s+w.amount,0),totalPend=wds.filter(w=>w.status==='قيد المراجعة').reduce((s,w)=>s+w.amount,0);
+  document.getElementById('aTotalPaid').textContent='$'+totalPaid;document.getElementById('aTotalPending').textContent='$'+totalPend;
+  document.getElementById('adminBalBody').innerHTML=users.map(u=>{const withdrawn=wds.filter(w=>w.userId===u.id&&w.status==='مكتمل').reduce((s,w)=>s+w.amount,0);return`<tr><td style="font-weight:600">${u.name}</td><td style="color:var(--accent);font-weight:700">$${u.balance.toFixed(2)}</td><td>$${u.totalEarned.toFixed(2)}</td><td>$${withdrawn}</td></tr>`}).join('');
+  const mMap={paypal:'PayPal',usdt:'USDT',zain:'زين كاش',bank:'حوالة بنكية'};
+  document.getElementById('adminWdBody').innerHTML=wds.map(w=>{const bc=w.status==='مكتمل'?'badge-success':w.status==='مرفوض'?'badge-danger':'badge-warn';const actions=w.status==='قيد المراجعة'?`<button class="btn btn-accent btn-sm" onclick="approveWd(${w.id})" style="margin-left:4px"><i class="fa-solid fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="rejectWd(${w.id})"><i class="fa-solid fa-xmark"></i></button>`:'—';return`<tr><td>${w.userName}</td><td style="font-weight:700">$${w.amount}</td><td>${mMap[w.method]||w.method}</td><td><span class="badge ${bc}">${w.status}</span></td><td style="white-space:nowrap">${actions}</td></tr>`}).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:28px">لا توجد طلبات</td></tr>';
+}
+
+function addTask(){
+  const title=document.getElementById('tTitle').value.trim(),desc=document.getElementById('tDesc').value.trim(),reward=parseFloat(document.getElementById('tReward').value),link=document.getElementById('tLink').value.trim();
+  if(!title||!desc||!reward)return toast('جميع الحقول مطلوبة','error');
+  const tasks=DB.get('tasks')||[];let nid=DB.get('nextTaskId')||tasks.length+1;
+  tasks.push({id:nid,title,desc,reward,active:true,link});DB.set('tasks',tasks);DB.set('nextTaskId',nid+1);
+  ['tTitle','tDesc','tReward','tLink'].forEach(x=>document.getElementById(x).value='');
+  toast('تم إضافة المهمة','success');refreshAdminDash();
+}
+function toggleTask(id){const tasks=DB.get('tasks')||[],t=tasks.find(x=>x.id===id);if(t){t.active=!t.active;DB.set('tasks',tasks);refreshAdminDash()}}
+function deleteTask(id){if(!confirm('حذف هذه المهمة؟'))return;DB.set('tasks',(DB.get('tasks')||[]).filter(t=>t.id!==id));toast('تم الحذف','info');refreshAdminDash()}
+function deleteUser(id){if(!confirm('حذف هذا المستخدم؟'))return;DB.set('users',(DB.get('users')||[]).filter(u=>u.id!==id));toast('تم الحذف','info');refreshAdminDash()}
+function approveWd(id){const wds=DB.get('withdrawals')||[],w=wds.find(x=>x.id===id);if(!w)return;w.status='مكتمل';const users=DB.get('users')||[],u=users.find(x=>x.id===w.userId);if(u){u.pending=Math.max(0,u.pending-w.amount);DB.set('users',users)}DB.set('withdrawals',wds);toast('تمت الموافقة','success');refreshAdminDash()}
+function rejectWd(id){const wds=DB.get('withdrawals')||[],w=wds.find(x=>x.id===id);if(!w)return;w.status='مرفوض';const users=DB.get('users')||[],u=users.find(x=>x.id===w.userId);if(u){u.balance+=w.amount;u.pending=Math.max(0,u.pending-w.amount);DB.set('users',users)}DB.set('withdrawals',wds);toast('تم الرفض','error');refreshAdminDash()}
+
+/* ════════════════════════════════════════════════════
+   ADVANCED MOTION ENGINE
+   ════════════════════════════════════════════════════ */
+
+/* ─── 1. Particle System ─── */
+function initParticles(){
+  const canvas=document.getElementById('particlesCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let w,h,particles=[];
+  function resize(){
+    const hero=document.getElementById('heroSection');
+    if(!hero)return;
+    w=canvas.width=hero.offsetWidth;
+    h=canvas.height=hero.offsetHeight;
+  }
+  resize();window.addEventListener('resize',resize);
+  class Particle{
+    constructor(){this.reset()}
+    reset(){
+      this.x=Math.random()*w;this.y=Math.random()*h;
+      this.size=Math.random()*2+.5;
+      this.speedX=(Math.random()-.5)*.3;
+      this.speedY=(Math.random()-.5)-.2;
+      this.opacity=Math.random()*.5+.1;
+      this.life=Math.random()*200+100;this.age=0;
+    }
+    update(){
+      this.x+=this.speedX;this.y+=this.speedY;this.age++;
+      if(this.age>this.life||this.x<0||this.x>w||this.y<0||this.y>h)this.reset();
+    }
+    draw(){
+      ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,212,170,${this.opacity*(1-this.age/this.life)})`;ctx.fill();
+    }
+  }
+  for(let i=0;i<50;i++)particles.push(new Particle());
+  function animate(){
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p=>{p.update();p.draw()});
+    // draw connections
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<120){
+          ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle=`rgba(0,212,170,${.06*(1-dist/120)})`;
+          ctx.lineWidth=.5;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/* ─── 2. Mouse Parallax on Orbs ─── */
+function initOrbParallax(){
+  const hero=document.getElementById('heroSection');
+  if(!hero)return;
+  const orbs=hero.querySelectorAll('.orb');
+  hero.addEventListener('mousemove',e=>{
+    const rect=hero.getBoundingClientRect();
+    const x=(e.clientX-rect.left)/rect.width-.5;
+    const y=(e.clientY-rect.top)/rect.height-.5;
+    orbs.forEach((orb,i)=>{
+      const speed=(i+1)*25;
+      orb.style.transform=`translate(${x*speed}px,${y*speed}px)`;
+    });
+  });
+  hero.addEventListener('mouseleave',()=>{
+    orbs.forEach(orb=>orb.style.transform='');
+  });
+}
+
+/* ─── 3. Scroll Progress Bar ─── */
+function initScrollProgress(){
+  const bar=document.getElementById('scrollProgress');
+  if(!bar)return;
+  window.addEventListener('scroll',()=>{
+    const h=document.documentElement.scrollHeight-window.innerHeight;
+    bar.style.width=h>0?((window.scrollY/h)*100)+'%':'0';
+  },{passive:true});
+}
+
+/* ─── 4. Counter Animation ─── */
+function animateCounter(el,target,prefix='',suffix=''){
+  const duration=1200;
+  const start=performance.now();
+  const initial=0;
+  function step(now){
+    const elapsed=now-start;
+    const progress=Math.min(elapsed/duration,1);
+    const eased=1-Math.pow(1-progress,3); // ease-out cubic
+    const current=Math.floor(initial+(target-initial)*eased);
+    if(target>=1000){
+      el.textContent=prefix+(current/1000).toFixed(current>=10000?0:1)+'K+';
+    }else{
+      el.textContent=prefix+current+suffix;
+    }
+    if(progress<1)requestAnimationFrame(step);
+    else el.classList.add('counter-pop');
+  }
+  requestAnimationFrame(step);
+}
+
+function initCounters(){
+  const counters=[
+    {sel:'.hs-num',data:[{val:24000,p:'',s:'K+'},{val:180,p:'$',s:'K'},{val:50,p:'',s:'+'}]}
+  ];
+  const items=document.querySelectorAll('.hs-num');
+  if(!items.length)return;
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const nums=[24000,180000,50];
+      const prefixes=['','$',''];
+      const suffixes=['K+','K','+'];
+      items.forEach((el,i)=>{
+        if(i>=nums.length)return;
+        const dur=1400;const start=performance.now();
+        function step(now){
+          const p=Math.min((now-start)/dur,1);
+          const eased=1-Math.pow(1-p,3);
+          const v=Math.floor(nums[i]*eased);
+          if(nums[i]>=1000)el.textContent=prefixes[i]+(v/1000).toFixed(0)+suffixes[i];
+          else el.textContent=prefixes[i]+v+suffixes[i];
+          if(p<1)requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+      obs.disconnect();
+    });
+  },{threshold:.5});
+  if(items[0])obs.observe(items[0].closest('.hero-stats-row')||items[0]);
+}
+
+/* ─── 5. 3D Tilt Cards ─── */
+function initTiltCards(){
+  document.querySelectorAll('.tilt-card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5;
+      const y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`perspective(600px) rotateY(${x*8}deg) rotateX(${-y*8}deg) translateY(-4px)`;
+      card.style.boxShadow=`${-x*15}px ${-y*15}px 30px rgba(0,0,0,.3)`;
+    });
+    card.addEventListener('mouseleave',()=>{
+      card.style.transform='';card.style.boxShadow='';
+    });
+  });
+}
+
+/* ─── 6. Magnetic Buttons ─── */
+function initMagneticBtns(){
+  document.querySelectorAll('.btn-magnetic').forEach(btn=>{
+    btn.addEventListener('mousemove',e=>{
+      const r=btn.getBoundingClientRect();
+      const x=e.clientX-r.left-r.width/2;
+      const y=e.clientY-r.top-r.height/2;
+      btn.style.transform=`translate(${x*.2}px,${y*.2}px)`;
+    });
+    btn.addEventListener('mouseleave',()=>{
+      btn.style.transform='';
+    });
+  });
+}
+
+/* ─── 7. Ripple Effect ─── */
+function initRipple(){
+  document.addEventListener('click',e=>{
+    const wrap=e.target.closest('.ripple-wrap');
+    if(!wrap)return;
+    const r=wrap.getBoundingClientRect();
+    const ripple=document.createElement('span');
+    ripple.className='ripple';
+    const size=Math.max(r.width,r.height);
+    ripple.style.width=ripple.style.height=size+'px';
+    ripple.style.left=(e.clientX-r.left-size/2)+'px';
+    ripple.style.top=(e.clientY-r.top-size/2)+'px';
+    wrap.appendChild(ripple);
+    setTimeout(()=>ripple.remove(),600);
+  });
+}
+
+/* ─── 8. Confetti on Task Completion ─── */
+function fireConfetti(){
+  const container=document.createElement('div');
+  container.className='confetti-container';
+  document.body.appendChild(container);
+  const colors=['#00d4aa','#6366f1','#ffb142','#ff4757','#00ffcc','#8b5cf6'];
+  for(let i=0;i<60;i++){
+    const piece=document.createElement('div');
+    piece.className='confetti-piece';
+    piece.style.left=Math.random()*100+'%';
+    piece.style.background=colors[Math.floor(Math.random()*colors.length)];
+    piece.style.width=(Math.random()*8+5)+'px';
+    piece.style.height=(Math.random()*8+5)+'px';
+    piece.style.borderRadius=Math.random()>.5?'50%':'2px';
+    piece.style.animationDelay=(Math.random()*.8)+'s';
+    piece.style.animationDuration=(Math.random()*1.5+1.5)+'s';
+    container.appendChild(piece);
+  }
+  setTimeout(()=>container.remove(),3500);
+}
+
+// Patch completeTask to fire confetti
+const _origCompleteTask=completeTask;
+completeTask=function(tid){
+  _origCompleteTask(tid);
+  fireConfetti();
+};
+
+/* ─── 9. Smooth Page Transitions ─── */
+const _origShowPage=showPage;
+showPage=function(id){
+  const current=document.querySelector('.page.active,.dash.active');
+  if(current){
+    current.style.animation='pageOut .25s ease forwards';
+    setTimeout(()=>{
+      current.style.animation='';
+      _origShowPage(id);
+    },200);
+  }else{
+    _origShowPage(id);
+  }
+};
+// add pageOut keyframes dynamically
+const pageOutStyle=document.createElement('style');
+pageOutStyle.textContent='@keyframes pageOut{to{opacity:0;transform:translateY(-10px)}}';
+document.head.appendChild(pageOutStyle);
+
+/* ─── 10. Stagger Grid Observer ─── */
+function initStaggerGrids(){
+  document.querySelectorAll('.stagger-grid').forEach(grid=>{
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(!e.isIntersecting)return;
+        const children=grid.querySelectorAll('.rv');
+        children.forEach((child,i)=>{
+          setTimeout(()=>child.classList.add('show'),i*100);
+        });
+        obs.unobserve(grid);
+      });
+    },{threshold:.1});
+    obs.observe(grid);
+  });
+}
+
+/* ─── 11. Typing effect on hero description ─── */
+function initTypingEffect(){
+  const heroP=document.querySelector('.hero-land-inner > p');
+  if(!heroP)return;
+  const text=heroP.textContent;
+  heroP.textContent='';
+  heroP.style.visibility='visible';
+  const cursor=document.createElement('span');
+  cursor.className='typewriter-cursor';
+  heroP.appendChild(cursor);
+  let i=0;
+  function type(){
+    if(i<text.length){
+      heroP.insertBefore(document.createTextNode(text[i]),cursor);
+      i++;
+      setTimeout(type,25);
+    }else{
+      setTimeout(()=>cursor.style.display='none',2000);
+    }
+  }
+  setTimeout(type,1200);
+}
+
+/* ─── 12. Smooth number update in dashboard ─── */
+function animateValue(el,newVal){
+  el.classList.add('counter-pop');
+  setTimeout(()=>el.classList.remove('counter-pop'),400);
+}
+
+/* ─── 13. Input focus label float ─── */
+function initInputAnimations(){
+  document.querySelectorAll('.input-wrap input,.input-wrap select').forEach(inp=>{
+    inp.addEventListener('focus',()=>{
+      inp.closest('.input-group')?.querySelector('label')?.style.setProperty('color','var(--accent)');
+    });
+    inp.addEventListener('blur',()=>{
+      inp.closest('.input-group')?.querySelector('label')?.style.setProperty('color','');
+    });
+  });
+}
+
+/* ─── 14. Auth form shake on error ─── */
+const _origToast=toast;
+toast=function(msg,type='info'){
+  _origToast(msg,type);
+  if(type==='error'){
+    const card=document.querySelector('.auth-card');
+    if(card&&card.offsetParent!==null){
+      card.style.animation='none';
+      card.offsetHeight; // reflow
+      card.style.animation='shake .4s ease';
+    }
+  }
+};
+const shakeStyle=document.createElement('style');
+shakeStyle.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}';
+document.head.appendChild(shakeStyle);
+
+/* ════════════════════════════════════════════════════
+   INIT ALL
+   ════════════════════════════════════════════════════ */
+window.addEventListener('load',()=>{
+  initData();
+  setTimeout(()=>document.getElementById('appLoader').classList.add('hide'),600);
+  // Init all motion systems
+  setTimeout(()=>{
+    initParticles();
+    initOrbParallax();
+    initScrollProgress();
+    initCounters();
+    initTiltCards();
+    initMagneticBtns();
+    initRipple();
+    initStaggerGrids();
+    initTypingEffect();
+    initInputAnimations();
+  },700);
+});
+
+// Navbar scroll
+window.addEventListener('scroll',()=>{
+  const n=document.getElementById('lNav');
+  if(n)n.classList.toggle('scrolled',window.scrollY>40);
+},{passive:true});
+
+// Standard reveal observer
+const rvObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');rvObs.unobserve(e.target)}})},{threshold:.12});
+document.querySelectorAll('.rv:not(.stagger-grid .rv),.rv-right,.rv-left,.rv-scale,.rv-flip').forEach(el=>rvObs.observe(el));
+</script>
+</body>
+</html>
