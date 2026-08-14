@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="theme-color" content="#0b0f1a">
+<title>TASKORA | منصة المهام والأرباح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0b0f1a;--bg2:#131829;--bg3:#1a2038;--bg4:#222845;
+--accent:#00d4aa;--accent2:#00ffcc;--accent-dim:rgba(0,212,170,.1);
+--indigo:#6366f1;--indigo-dim:rgba(99,102,241,.1);
+--danger:#ff4757;--warn:#ffb142;--success:#00d4aa;
+--text:#e8ecf4;--text2:#8892b0;--text3:#4a5578;
+--radius:14px;--radius-sm:10px;
+--shadow:0 8px 32px rgba(0,0,0,.4);
+--glass:rgba(19,24,41,.65);--glass-border:rgba(255,255,255,.06);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;line-height:1.7}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:inherit;border:none}
+input,select,textarea{font-family:inherit}
+img{max-width:100%;display:block}
+ul{list-style:none}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:10px}
+
+/* ═══ Loading ═══ */
+#appLoader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity .5s}
+#appLoader.hide{opacity:0;pointer-events:none}
+.ld-logo{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ld-bar{width:120px;height:3px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.ld-bar span{display:block;height:100%;width:40%;background:var(--accent);border-radius:4px;animation:ldSlide 1s ease infinite}
+@keyframes ldSlide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+
+/* ═══ Toast ═══ */
+.toast-box{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{padding:12px 28px;border-radius:var(--radius-sm);font-size:.88rem;font-weight:600;color:#fff;animation:toastIn .35s;box-shadow:var(--shadow)}
+.toast-success{background:var(--accent);color:var(--bg)}
+.toast-error{background:var(--danger)}
+.toast-info{background:var(--indigo)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ Page transitions ═══ */
+.page{display:none;animation:pageIn .4s ease}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ Buttons ═══ */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--radius-sm);font-size:.9rem;font-weight:700;transition:all .3s}
+.btn-accent{background:var(--accent);color:var(--bg)}
+.btn-accent:hover{box-shadow:0 8px 30px rgba(0,212,170,.3);transform:translateY(-2px)}
+.btn-outline{background:transparent;border:1.5px solid rgba(0,212,170,.35);color:var(--accent)}
+.btn-outline:hover{background:var(--accent-dim)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{opacity:.85}
+.btn-sm{padding:8px 18px;font-size:.82rem}
+.btn-full{width:100%;justify-content:center}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ═══ Inputs ═══ */
+.input-group{margin-bottom:18px}
+.input-group label{display:block;font-size:.82rem;font-weight:600;color:var(--text2);margin-bottom:6px}
+.input-wrap{position:relative}
+.input-wrap i{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.9rem}
+.input-wrap input,.input-wrap select,.input-wrap textarea{width:100%;padding:12px 14px 12px 42px;border-radius:var(--radius-sm);border:1.5px solid var(--glass-border);background:var(--bg);color:var(--text);font-size:.9rem;transition:border .3s}
+.input-wrap input:focus,.input-wrap select:focus,.input-wrap textarea:focus{outline:none;border-color:var(--accent)}
+
+/* ═══════════════════════════════════ */
+/*         LANDING PAGE               */
+/* ═══════════════════════════════════ */
+
+/* Navbar */
+.l-nav{position:fixed;top:0;right:0;left:0;z-index:100;padding:16px 0;transition:all .4s}
+.l-nav.scrolled{background:rgba(11,15,26,.9);backdrop-filter:blur(16px);box-shadow:0 2px 20px rgba(0,0,0,.4)}
+.l-nav-inner{max-width:1200px;margin:auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between}
+.l-logo{font-family:'Sora',sans-serif;font-size:1.35rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.l-logo span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.l-logo i{color:var(--accent);font-size:1.1rem}
+.l-nav-links{display:flex;gap:20px;align-items:center}
+.l-nav-links .btn{padding:10px 22px}
+.l-menu-btn{display:none;background:none;color:var(--text);font-size:1.3rem}
+
+/* Hero */
+.hero-land{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden}
+.orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:orbFloat 12s ease-in-out infinite}
+.orb-1{width:400px;height:400px;background:var(--accent);top:-10%;right:-5%;animation-delay:0s}
+.orb-2{width:350px;height:350px;background:var(--indigo);bottom:-10%;left:-8%;animation-delay:-4s}
+.orb-3{width:250px;height:250px;background:#8b5cf6;top:40%;left:30%;animation-delay:-8s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-40px) scale(1.05)}50%{transform:translate(-20px,30px) scale(.95)}75%{transform:translate(40px,20px) scale(1.03)}}
+
+.hero-land-inner{position:relative;z-index:2;max-width:1200px;margin:auto;padding:140px 28px 80px;text-align:center}
+.hero-chip{display:inline-flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid rgba(0,212,170,.2);color:var(--accent);padding:7px 18px;border-radius:50px;font-size:.8rem;font-weight:600;margin-bottom:24px;animation:fadeUp .7s .2s both}
+.hero-chip i{font-size:.55rem}
+.hero-land h1{font-size:clamp(2rem,5vw,3.6rem);font-weight:900;line-height:1.2;margin-bottom:18px;animation:fadeUp .7s .4s both}
+.hero-land h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-land p{font-size:1.05rem;color:var(--text2);max-width:560px;margin:0 auto 36px;animation:fadeUp .7s .6s both}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;animation:fadeUp .7s .8s both}
+.hero-stats-row{display:flex;justify-content:center;gap:48px;margin-top:56px;animation:fadeUp .7s 1s both}
+.hs-item{text-align:center}
+.hs-num{font-family:'Sora';font-size:1.8rem;font-weight:800;color:var(--accent)}
+.hs-lbl{font-size:.78rem;color:var(--text3);margin-top:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+/* How it works */
+.l-section{padding:80px 0}
+.l-container{max-width:1200px;margin:auto;padding:0 28px}
+.l-head{text-align:center;margin-bottom:48px}
+.l-head .chip{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.l-head .chip i{font-size:.5rem}
+.l-head h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:800}
+.l-head p{color:var(--text2);max-width:480px;margin:10px auto 0;font-size:.92rem}
+
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px}
+.step-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:32px 24px;text-align:center;transition:all .4s;position:relative}
+.step-card:hover{transform:translateY(-6px);border-color:rgba(0,212,170,.15);box-shadow:var(--shadow)}
+.step-num{font-family:'Sora';font-size:2.5rem;font-weight:800;color:var(--bg3);position:absolute;top:12px;left:16px;line-height:1}
+.step-icon{width:52px;height:52px;border-radius:14px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.2rem;color:var(--accent);transition:all .3s}
+.step-card:hover .step-icon{background:var(--accent);color:var(--bg)}
+.step-card h3{font-size:.95rem;font-weight:700;margin-bottom:6px}
+.step-card p{font-size:.82rem;color:var(--text2)}
+
+/* Features */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.feat-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;transition:all .4s}
+.feat-card:hover{border-color:rgba(0,212,170,.15);transform:translateY(-4px)}
+.feat-card i{font-size:1.3rem;color:var(--accent);margin-bottom:14px;display:block}
+.feat-card h3{font-size:.95rem;font-weight:700;margin-bottom:6px}
+.feat-card p{font-size:.82rem;color:var(--text2)}
+
+/* Landing footer */
+.l-footer{border-top:1px solid var(--glass-border);padding:28px 0;text-align:center}
+.l-footer p{font-size:.8rem;color:var(--text3)}
+
+/* ═══════════════════════════════════ */
+/*         AUTH PAGES                 */
+/* ═══════════════════════════════════ */
+.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:40px 20px}
+.auth-orbs{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.auth-card{position:relative;z-index:2;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:var(--shadow)}
+.auth-card .l-logo{justify-content:center;margin-bottom:8px;font-size:1.5rem}
+.auth-card h2{text-align:center;font-size:1.15rem;font-weight:700;margin-bottom:4px}
+.auth-card .sub{text-align:center;font-size:.82rem;color:var(--text2);margin-bottom:28px}
+.auth-footer{text-align:center;margin-top:18px;font-size:.82rem;color:var(--text2)}
+.auth-footer a{color:var(--accent);font-weight:600}
+
+/* ═══════════════════════════════════ */
+/*         DASHBOARD                  */
+/* ═══════════════════════════════════ */
+.dash{display:none;min-height:100vh}
+.dash.active{display:flex}
+
+/* Sidebar */
+.sidebar{width:260px;background:var(--bg2);border-left:1px solid var(--glass-border);padding:24px 0;display:flex;flex-direction:column;position:fixed;top:0;right:0;bottom:0;z-index:50;transition:transform .35s}
+.sb-logo{padding:0 24px 24px;border-bottom:1px solid var(--glass-border);margin-bottom:12px}
+.sb-logo .l-logo{font-size:1.15rem}
+.sb-role{font-size:.7rem;color:var(--text3);display:block;margin-top:4px}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 12px}
+.sb-link{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:var(--radius-sm);font-size:.88rem;font-weight:600;color:var(--text2);transition:all .3s;margin-bottom:2px;cursor:pointer}
+.sb-link:hover{color:var(--text);background:var(--bg3)}
+.sb-link.active{color:var(--accent);background:var(--accent-dim)}
+.sb-link i{font-size:.95rem;width:20px;text-align:center}
+.sb-divider{font-size:.7rem;color:var(--text3);font-weight:700;padding:16px 16px 6px;letter-spacing:1px;text-transform:uppercase}
+.sb-bottom{padding:12px;border-top:1px solid var(--glass-border)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg);cursor:pointer}
+.sb-avatar{width:36px;height:36px;border-radius:10px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:800;font-size:.85rem}
+.sb-uname{font-size:.82rem;font-weight:600}
+.sb-uemail{font-size:.7rem;color:var(--text3)}
+.sb-logout{display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;border-radius:var(--radius-sm);background:none;color:var(--danger);font-size:.82rem;font-weight:600;margin-top:8px;transition:background .3s}
+.sb-logout:hover{background:rgba(255,71,87,.08)}
+
+/* Main area */
+.dash-main{flex:1;margin-right:260px;padding:28px;min-height:100vh}
+.dash-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.dash-topbar h1{font-size:1.3rem;font-weight:800}
+.dash-topbar-left{display:flex;align-items:center;gap:12px}
+.sb-toggle{display:none;background:none;color:var(--text);font-size:1.3rem}
+
+/* Cards grid */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:22px;transition:all .3s}
+.stat-card:hover{border-color:rgba(0,212,170,.15)}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.sc-icon.teal{background:var(--accent-dim);color:var(--accent)}
+.sc-icon.indigo{background:var(--indigo-dim);color:var(--indigo)}
+.sc-icon.warn{background:rgba(255,177,66,.1);color:var(--warn)}
+.sc-icon.red{background:rgba(255,71,87,.1);color:var(--danger)}
+.sc-num{font-family:'Sora';font-size:1.5rem;font-weight:800}
+.sc-label{font-size:.78rem;color:var(--text2);margin-top:2px}
+
+/* Data table */
+.d-table-wrap{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+.d-table-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--glass-border)}
+.d-table-head h3{font-size:.95rem;font-weight:700}
+.d-table{width:100%;border-collapse:collapse}
+.d-table th{padding:12px 18px;font-size:.78rem;font-weight:700;color:var(--text3);text-align:right;background:var(--bg);border-bottom:1px solid var(--glass-border)}
+.d-table td{padding:12px 18px;font-size:.85rem;border-bottom:1px solid var(--glass-border)}
+.d-table tr:last-child td{border-bottom:none}
+.d-table tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-flex;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:700}
+.badge-success{background:rgba(0,212,170,.1);color:var(--accent)}
+.badge-warn{background:rgba(255,177,66,.1);color:var(--warn)}
+.badge-danger{background:rgba(255,71,87,.1);color:var(--danger)}
+.badge-info{background:var(--indigo-dim);color:var(--indigo)}
+
+/* Task cards */
+.tasks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.task-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:22px;transition:all .4s}
+.task-card:hover{border-color:rgba(0,212,170,.15);transform:translateY(-3px);box-shadow:var(--shadow)}
+.tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tc-reward{font-family:'Sora';font-weight:800;color:var(--accent);font-size:1.1rem}
+.tc-title{font-size:.95rem;font-weight:700;margin-bottom:6px}
+.tc-desc{font-size:.82rem;color:var(--text2);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tc-footer{display:flex;align-items:center;justify-content:space-between}
+.tc-meta{font-size:.75rem;color:var(--text3);display:flex;align-items:center;gap:6px}
+
+/* Withdraw form */
+.withdraw-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;max-width:500px}
+.withdraw-card h3{font-size:1rem;font-weight:700;margin-bottom:18px}
+
+/* Account */
+.account-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius);padding:28px;max-width:600px}
+.acc-avatar-row{display:flex;align-items:center;gap:18px;margin-bottom:24px}
+.acc-avatar-big{width:64px;height:64px;border-radius:16px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:var(--accent)}
+
+/* ═══ Dash view sections ═══ */
+.dash-view{display:none;animation:pageIn .35s ease}
+.dash-view.active{display:block}
+
+/* ═══ Empty state ═══ */
+.empty-state{text-align:center;padding:56px 20px;color:var(--text3)}
+.empty-state i{font-size:2.5rem;margin-bottom:14px;display:block;color:var(--bg4)}
+.empty-state p{font-size:.9rem}
+
+/* ═══ Mobile overlay ═══ */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40}
+
+/* ═══ Responsive ═══ */
+@media(max-width:900px){
+  .l-nav-links .nav-hide{display:none}
+  .l-menu-btn{display:block}
+  .sidebar{transform:translateX(100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sb-overlay.open{display:block}
+  .dash-main{margin-right:0}
+  .sb-toggle{display:block}
+  .hero-stats-row{gap:24px;flex-wrap:wrap}
+  .stat-cards{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:500px){
+  .stat-cards{grid-template-columns:1fr}
+  .tasks-grid{grid-template-columns:1fr}
+  .auth-card{padding:28px 22px}
+  .d-table-wrap{overflow-x:auto}
+}
+
+/* ═══ Reveal ═══ */
+.rv{opacity:0;transform:translateY(30px);transition:all .6s cubic-bezier(.22,1,.36,1)}
+.rv.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="appLoader">
+  <div class="ld-logo">TASKORA</div>
+  <div class="ld-bar"><span></span></div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-box" id="toastBox"></div>
+
+<!-- ══════════════════════════════ -->
+<!--         LANDING PAGE          -->
+<!-- ══════════════════════════════ -->
+<div class="page active" id="pageLanding">
+<nav class="l-nav" id="lNav">
+  <div class="l-nav-inner">
+    <a href="#" class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></a>
+    <div class="l-nav-links">
+      <button class="btn btn-outline btn-sm nav-hide" onclick="showPage('pageLogin')"><i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل دخول</button>
+      <button class="btn btn-accent btn-sm" onclick="showPage('pageRegister')"><i class="fa-solid fa-user-plus"></i> حساب جديد</button>
+      <button class="l-menu-btn" onclick="showPage('pageLogin')"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-land">
+  <div class="orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+  <div class="hero-land-inner">
+    <div class="hero-chip"><i class="fa-solid fa-circle"></i> منصة المهام الأولى عربياً</div>
+    <h1>أكمل المهام<br>واكسب <em>أرباحاً حقيقية</em></h1>
+    <p>سجّل حسابك، أكمل المهام المتاحة يومياً، واسحب أرباحك بسهولة. آلاف المستخدمين يكسبون معنا كل يوم.</p>
+    <div class="hero-btns">
+      <button class="btn btn-accent" onclick="showPage('pageRegister')"><i class="fa-solid fa-rocket"></i> ابدأ الآن مجاناً</button>
+      <button class="btn btn-outline" onclick="document.getElementById('howSection').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-circle-info"></i> كيف تعمل؟</button>
+    </div>
+    <div class="hero-stats-row">
+      <div class="hs-item"><div class="hs-num">24K+</div><div class="hs-lbl">مستخدم نشط</div></div>
+      <div class="hs-item"><div class="hs-num">$180K</div><div class="hs-lbl">تم سحبها</div></div>
+      <div class="hs-item"><div class="hs-num">50+</div><div class="hs-lbl">مهمة يومية</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="l-section" id="howSection">
+  <div class="l-container">
+    <div class="l-head rv">
+      <div class="chip"><i class="fa-solid fa-circle"></i> كيف تعمل المنصة</div>
+      <h2>ثلاث خطوات فقط</h2>
+      <p>ابدأ رحلتك في الربح من خلال خطوات بسيطة وسريعة</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card rv"><span class="step-num">01</span><div class="step-icon"><i class="fa-solid fa-user-plus"></i></div><h3>أنشئ حسابك</h3><p>سجّل بالاسم والبريد وكلمة المرور خلال ثوانٍ</p></div>
+      <div class="step-card rv"><span class="step-num">02</span><div class="step-icon"><i class="fa-solid fa-list-check"></i></div><h3>أكمل المهام</h3><p>تصفّح المهام المتاحة وأكمل المطلوب لكسب النقاط</p></div>
+      <div class="step-card rv"><span class="step-num">03</span><div class="step-icon"><i class="fa-solid fa-wallet"></i></div><h3>اسحب أرباحك</h3><p>حوّل رصيدك إلى أموال حقيقية عبر طرق دفع متعددة</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="l-section" style="background:rgba(255,255,255,.01)">
+  <div class="l-container">
+    <div class="l-head rv">
+      <div class="chip"><i class="fa-solid fa-circle"></i> لماذا تاسكورا؟</div>
+      <h2>مميزات المنصة</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card rv"><i class="fa-solid fa-shield-halved"></i><h3>آمنة وموثوقة</h3><p>بياناتك محمية بأعلى معايير الأمان والتشفير</p></div>
+      <div class="feat-card rv"><i class="fa-solid fa-money-bill-transfer"></i><h3>سحب فوري</h3><p>اسحب أرباحك خلال 24 ساعة بطرق دفع متعددة</p></div>
+      <div class="feat-card rv"><i class="fa-solid fa-clock-rotate-left"></i><h3>مهام يومية</h3><p>مهام جديدة تُضاف يومياً لتضمن دخلاً مستمراً</p></div>
+      <div class="feat-card rv"><i class="fa-solid fa-headset"></i><h3>دعم متواصل</h3><p>فريق الدعم متاح لمساعدتك في أي وقت</p></div>
+    </div>
+  </div>
+</section>
+
+<footer class="l-footer">
+  <div class="l-container">
+    <p>&copy; 2026 TASKORA — جميع الحقوق محفوظة</p>
+  </div>
+</footer>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!--         REGISTER              -->
+<!-- ══════════════════════════════ -->
+<div class="page" id="pageRegister">
+  <div class="auth-page">
+    <div class="auth-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+    <div class="auth-card">
+      <div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div>
+      <h2>إنشاء حساب جديد</h2>
+      <p class="sub">أنشئ حسابك وابدأ بكسب الأرباح</p>
+      <div class="input-group"><label>الاسم الكامل</label><div class="input-wrap"><i class="fa-solid fa-user"></i><input type="text" id="regName" placeholder="أدخل اسمك"></div></div>
+      <div class="input-group"><label>البريد الإلكتروني</label><div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="regEmail" placeholder="example@mail.com" dir="ltr"></div></div>
+      <div class="input-group"><label>كلمة المرور</label><div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="regPass" placeholder="••••••••" dir="ltr"></div></div>
+      <div class="input-group"><label>تأكيد كلمة المرور</label><div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="regPass2" placeholder="••••••••" dir="ltr"></div></div>
+      <button class="btn btn-accent btn-full" onclick="doRegister()"><i class="fa-solid fa-user-plus"></i> إنشاء الحساب</button>
+      <div class="auth-footer">لديك حساب بالفعل؟ <a href="#" onclick="showPage('pageLogin');return false">تسجيل دخول</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!--         LOGIN                 -->
+<!-- ══════════════════════════════ -->
+<div class="page" id="pageLogin">
+  <div class="auth-page">
+    <div class="auth-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+    <div class="auth-card">
+      <div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div>
+      <h2>تسجيل الدخول</h2>
+      <p class="sub">أدخل بياناتك للوصول إلى حسابك</p>
+      <div class="input-group"><label>البريد الإلكتروني</label><div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="logEmail" placeholder="example@mail.com" dir="ltr"></div></div>
+      <div class="input-group"><label>كلمة المرور</label><div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="logPass" placeholder="••••••••" dir="ltr"></div></div>
+      <button class="btn btn-accent btn-full" onclick="doLogin()"><i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول</button>
+      <div class="auth-footer">ليس لديك حساب؟ <a href="#" onclick="showPage('pageRegister');return false">إنشاء حساب</a></div>
+      <div style="text-align:center;margin-top:14px;border-top:1px solid var(--glass-border);padding-top:14px">
+        <p style="font-size:.75rem;color:var(--text3);margin-bottom:8px">حساب تجريبي للأدمن:</p>
+        <button class="btn btn-outline btn-sm" onclick="loginAdmin()" style="font-size:.78rem"><i class="fa-solid fa-user-shield"></i> دخول كمسؤول</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!--    USER DASHBOARD             -->
+<!-- ══════════════════════════════ -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+<div class="dash" id="dashUser">
+  <aside class="sidebar" id="sidebarUser">
+    <div class="sb-logo">
+      <div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div>
+      <span class="sb-role">لوحة المستخدم</span>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-link active" data-view="uTasks" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-list-check"></i> المهام</div>
+      <div class="sb-link" data-view="uBalance" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-wallet"></i> رصيدي</div>
+      <div class="sb-link" data-view="uEarnings" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-chart-line"></i> سجل الأرباح</div>
+      <div class="sb-link" data-view="uWithdraw" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-money-bill-transfer"></i> السحب</div>
+      <div class="sb-link" data-view="uAccount" onclick="switchView(this,'dashUser')"><i class="fa-solid fa-gear"></i> الحساب</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user"><div class="sb-avatar" id="uAvatarSB">U</div><div><div class="sb-uname" id="uNameSB">المستخدم</div><div class="sb-uemail" id="uEmailSB">user@mail.com</div></div></div>
+      <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> تسجيل خروج</button>
+    </div>
+  </aside>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left"><button class="sb-toggle" onclick="toggleSidebar('sidebarUser')"><i class="fa-solid fa-bars"></i></button><h1 id="uViewTitle">المهام المتاحة</h1></div>
+    </div>
+
+    <!-- User: Tasks -->
+    <div class="dash-view active" id="uTasks">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-list-check"></i></div></div><div class="sc-num" id="uTotalTasks">0</div><div class="sc-label">مهام متاحة</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon indigo"><i class="fa-solid fa-circle-check"></i></div></div><div class="sc-num" id="uDoneTasks">0</div><div class="sc-label">مهام مكتملة</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon warn"><i class="fa-solid fa-wallet"></i></div></div><div class="sc-num" id="uBalHead">$0.00</div><div class="sc-label">رصيدك الحالي</div></div>
+      </div>
+      <div class="d-table-head" style="background:var(--bg2);border:1px solid var(--glass-border);border-radius:var(--radius) var(--radius) 0 0;margin-bottom:0"><h3>المهام المتاحة</h3></div>
+      <div class="tasks-grid" id="userTasksList" style="border:1px solid var(--glass-border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:16px"></div>
+    </div>
+
+    <!-- User: Balance -->
+    <div class="dash-view" id="uBalance">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-wallet"></i></div></div><div class="sc-num" id="uBalVal">$0.00</div><div class="sc-label">الرصيد المتاح</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon warn"><i class="fa-solid fa-clock-rotate-left"></i></div></div><div class="sc-num" id="uPendVal">$0.00</div><div class="sc-label">قيد السحب</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon indigo"><i class="fa-solid fa-arrow-down"></i></div></div><div class="sc-num" id="uTotalEarned">$0.00</div><div class="sc-label">إجمالي الأرباح</div></div>
+      </div>
+    </div>
+
+    <!-- User: Earnings -->
+    <div class="dash-view" id="uEarnings">
+      <div class="d-table-wrap">
+        <div class="d-table-head"><h3>سجل الأرباح</h3></div>
+        <table class="d-table"><thead><tr><th>المهمة</th><th>المبلغ</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody id="earningsBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- User: Withdraw -->
+    <div class="dash-view" id="uWithdraw">
+      <div class="withdraw-card">
+        <h3><i class="fa-solid fa-money-bill-transfer" style="color:var(--accent);margin-left:8px"></i> طلب سحب</h3>
+        <div class="input-group"><label>المبلغ ($)</label><div class="input-wrap"><i class="fa-solid fa-dollar-sign"></i><input type="number" id="wdAmount" placeholder="أدخل المبلغ" dir="ltr" min="5"></div></div>
+        <div class="input-group"><label>طريقة الدفع</label><div class="input-wrap"><i class="fa-solid fa-credit-card"></i><select id="wdMethod"><option value="paypal">PayPal</option><option value="usdt">USDT (TRC20)</option><option value="zain">زين كاش</option><option value="bank">حوالة بنكية</option></select></div></div>
+        <div class="input-group"><label>رقم الحساب</label><div class="input-wrap"><i class="fa-solid fa-hashtag"></i><input type="text" id="wdAccount" placeholder="أدخل رقم الحساب أو المحفظة" dir="ltr"></div></div>
+        <button class="btn btn-accent btn-full" onclick="doWithdraw()"><i class="fa-solid fa-paper-plane"></i> إرسال الطلب</button>
+      </div>
+      <div class="d-table-wrap" style="margin-top:24px">
+        <div class="d-table-head"><h3>طلبات السحب السابقة</h3></div>
+        <table class="d-table"><thead><tr><th>المبلغ</th><th>الطريقة</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody id="wdHistBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- User: Account -->
+    <div class="dash-view" id="uAccount">
+      <div class="account-card">
+        <div class="acc-avatar-row"><div class="acc-avatar-big" id="uAvatarBig">U</div><div><h3 id="uAccName">المستخدم</h3><p style="font-size:.82rem;color:var(--text2)" id="uAccEmail">user@mail.com</p></div></div>
+        <div class="input-group"><label>الاسم</label><div class="input-wrap"><i class="fa-solid fa-user"></i><input type="text" id="accName"></div></div>
+        <div class="input-group"><label>البريد الإلكتروني</label><div class="input-wrap"><i class="fa-solid fa-envelope"></i><input type="email" id="accEmail" dir="ltr"></div></div>
+        <button class="btn btn-accent" onclick="saveAccount()"><i class="fa-solid fa-floppy-disk"></i> حفظ التغييرات</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!--    ADMIN DASHBOARD            -->
+<!-- ══════════════════════════════ -->
+<div class="dash" id="dashAdmin">
+  <aside class="sidebar" id="sidebarAdmin">
+    <div class="sb-logo">
+      <div class="l-logo"><i class="fa-solid fa-bolt"></i><span>TASKORA</span></div>
+      <span class="sb-role"><i class="fa-solid fa-shield-halved" style="color:var(--accent);margin-left:4px"></i> لوحة الإدارة</span>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-link active" data-view="aUsers" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-users"></i> المستخدمون</div>
+      <div class="sb-link" data-view="aAddTask" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-plus-circle"></i> إضافة المهام</div>
+      <div class="sb-link" data-view="aCompleted" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-clipboard-check"></i> المهام المكتملة</div>
+      <div class="sb-link" data-view="aBalances" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-coins"></i> الأرصدة</div>
+      <div class="sb-link" data-view="aWithdrawals" onclick="switchView(this,'dashAdmin')"><i class="fa-solid fa-money-check-dollar"></i> طلبات السحب</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user"><div class="sb-avatar" style="background:var(--indigo-dim);color:var(--indigo)">A</div><div><div class="sb-uname">المسؤول</div><div class="sb-uemail">admin@taskora.com</div></div></div>
+      <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> تسجيل خروج</button>
+    </div>
+  </aside>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left"><button class="sb-toggle" onclick="toggleSidebar('sidebarAdmin')"><i class="fa-solid fa-bars"></i></button><h1 id="aViewTitle">المستخدمون</h1></div>
+    </div>
+
+    <!-- Admin: Users -->
+    <div class="dash-view active" id="aUsers">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-users"></i></div></div><div class="sc-num" id="aTotalUsers">0</div><div class="sc-label">إجمالي المستخدمين</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon indigo"><i class="fa-solid fa-user-check"></i></div></div><div class="sc-num" id="aActiveUsers">0</div><div class="sc-label">نشط</div></div>
+      </div>
+      <div class="d-table-wrap"><div class="d-table-head"><h3>قائمة المستخدمين</h3></div>
+        <table class="d-table"><thead><tr><th>الاسم</th><th>البريد</th><th>الرصيد</th><th>المهام</th><th>إجراء</th></tr></thead><tbody id="adminUsersBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- Admin: Add Task -->
+    <div class="dash-view" id="aAddTask">
+      <div class="withdraw-card" style="max-width:600px">
+        <h3><i class="fa-solid fa-plus-circle" style="color:var(--accent);margin-left:8px"></i> إضافة مهمة جديدة</h3>
+        <div class="input-group"><label>عنوان المهمة</label><div class="input-wrap"><i class="fa-solid fa-heading"></i><input type="text" id="tTitle" placeholder="مثال: مشاهدة فيديو إعلاني"></div></div>
+        <div class="input-group"><label>وصف المهمة</label><div class="input-wrap"><i class="fa-solid fa-align-right"></i><input type="text" id="tDesc" placeholder="وصف مختصر للمهمة المطلوبة"></div></div>
+        <div class="input-group"><label>المكافأة ($)</label><div class="input-wrap"><i class="fa-solid fa-dollar-sign"></i><input type="number" id="tReward" placeholder="0.50" step="0.01" dir="ltr"></div></div>
+        <div class="input-group"><label>الرابط (اختياري)</label><div class="input-wrap"><i class="fa-solid fa-link"></i><input type="url" id="tLink" placeholder="https://..." dir="ltr"></div></div>
+        <button class="btn btn-accent btn-full" onclick="addTask()"><i class="fa-solid fa-plus"></i> إضافة المهمة</button>
+      </div>
+      <div class="d-table-wrap" style="margin-top:24px"><div class="d-table-head"><h3>المهام الحالية</h3></div>
+        <table class="d-table"><thead><tr><th>العنوان</th><th>المكافأة</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="adminTasksBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- Admin: Completed Tasks -->
+    <div class="dash-view" id="aCompleted">
+      <div class="d-table-wrap"><div class="d-table-head"><h3>المهام المكتملة من المستخدمين</h3></div>
+        <table class="d-table"><thead><tr><th>المستخدم</th><th>المهمة</th><th>المكافأة</th><th>التاريخ</th></tr></thead><tbody id="adminCompBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- Admin: Balances -->
+    <div class="dash-view" id="aBalances">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon teal"><i class="fa-solid fa-coins"></i></div></div><div class="sc-num" id="aTotalPaid">$0</div><div class="sc-label">إجمالي المدفوع</div></div>
+        <div class="stat-card"><div class="sc-top"><div class="sc-icon warn"><i class="fa-solid fa-hourglass-half"></i></div></div><div class="sc-num" id="aTotalPending">$0</div><div class="sc-label">قيد الانتظار</div></div>
+      </div>
+      <div class="d-table-wrap"><div class="d-table-head"><h3>أرصدة المستخدمين</h3></div>
+        <table class="d-table"><thead><tr><th>المستخدم</th><th>الرصيد</th><th>إجمالي الأرباح</th><th>المسحوب</th></tr></thead><tbody id="adminBalBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- Admin: Withdrawals -->
+    <div class="dash-view" id="aWithdrawals">
+      <div class="d-table-wrap"><div class="d-table-head"><h3>طلبات السحب</h3></div>
+        <table class="d-table"><thead><tr><th>المستخدم</th><th>المبلغ</th><th>الطريقة</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="adminWdBody"></tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   DATA LAYER — localStorage
+   ════════════════════════════════════════ */
+const DB={
+  get(k){try{return JSON.parse(localStorage.getItem('tk_'+k))}catch{return null}},
+  set(k,v){localStorage.setItem('tk_'+k,JSON.stringify(v))},
+  rm(k){localStorage.removeItem('tk_'+k)}
+};
+
+function initData(){
+  if(!DB.get('init')){
+    DB.set('users',[
+      {id:1,name:'أحمد خالد',email:'ahmed@test.com',pass:'123456',balance:12.50,totalEarned:42.50,pending:5,completedTasks:[1,2,3]},
+      {id:2,name:'سارة محمد',email:'sara@test.com',pass:'123456',balance:8.00,totalEarned:28.00,pending:0,completedTasks:[1,2]},
+      {id:3,name:'علي حسن',email:'ali@test.com',pass:'123456',balance:25.75,totalEarned:65.75,pending:10,completedTasks:[1,2,3,4]}
+    ]);
+    DB.set('tasks',[
+      {id:1,title:'مشاهدة فيديو إعلاني',desc:'شاهد الفيديو كاملاً حتى النهاية (30 ثانية)',reward:0.50,active:true,link:''},
+      {id:2,title:'تقييم تطبيق على المتجر',desc:'حمّل التطبيق واكتب تقييماً من 5 نجوم مع تعليق',reward:1.00,active:true,link:''},
+      {id:3,title:'متابعة حساب انستغرام',desc:'تابع الحساب المطلوب وأبقِ المتابعة لمدة 7 أيام',reward:0.75,active:true,link:''},
+      {id:4,title:'ملء استبيان قصير',desc:'أجب على 10 أسئلة في استبيان رأي المستهلك',reward:1.50,active:true,link:''},
+      {id:5,title:'مشاركة منشور على فيسبوك',desc:'شارك المنشور على صفحتك الشخصية واتركه 24 ساعة',reward:0.60,active:true,link:''}
+    ]);
+    DB.set('earnings',[
+      {userId:1,taskId:1,taskTitle:'مشاهدة فيديو إعلاني',amount:0.50,date:'2026-08-10',status:'مكتمل'},
+      {userId:1,taskId:2,taskTitle:'تقييم تطبيق على المتجر',amount:1.00,date:'2026-08-11',status:'مكتمل'},
+      {userId:1,taskId:3,taskTitle:'متابعة حساب انستغرام',amount:0.75,date:'2026-08-12',status:'مكتمل'},
+      {userId:2,taskId:1,taskTitle:'مشاهدة فيديو إعلاني',amount:0.50,date:'2026-08-11',status:'مكتمل'},
+      {userId:2,taskId:2,taskTitle:'تقييم تطبيق على المتجر',amount:1.00,date:'2026-08-13',status:'مكتمل'},
+      {userId:3,taskId:1,taskTitle:'مشاهدة فيديو إعلاني',amount:0.50,date:'2026-08-09',status:'مكتمل'},
+      {userId:3,taskId:2,taskTitle:'تقييم تطبيق على المتجر',amount:1.00,date:'2026-08-10',status:'مكتمل'},
+      {userId:3,taskId:3,taskTitle:'متابعة حساب انستغرام',amount:0.75,date:'2026-08-11',status:'مكتمل'},
+      {userId:3,taskId:4,taskTitle:'ملء استبيان قصير',amount:1.50,date:'2026-08-13',status:'مكتمل'}
+    ]);
+    DB.set('withdrawals',[
+      {id:1,userId:1,userName:'أحمد خالد',amount:25,method:'paypal',account:'ahmed@paypal.com',date:'2026-08-12',status:'مكتمل'},
+      {id:2,userId:3,userName:'علي حسن',amount:30,method:'usdt',account:'TRx...abc',date:'2026-08-13',status:'قيد المراجعة'},
+      {id:3,userId:1,userName:'أحمد خالد',amount:5,method:'zain',account:'07701234567',date:'2026-08-14',status:'قيد المراجعة'}
+    ]);
+    DB.set('nextUserId',4);
+    DB.set('nextTaskId',6);
+    DB.set('nextWdId',4);
+    DB.set('init',true);
+  }
+}
+
+/* ════════════════════════════════════════
+   UI HELPERS
+   ════════════════════════════════════════ */
+function toast(msg,type='info'){
+  const box=document.getElementById('toastBox');
+  const el=document.createElement('div');
+  el.className='toast toast-'+type;
+  el.textContent=msg;
+  box.appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+}
+
+function showPage(id){
+  document.querySelectorAll('.page,.dash').forEach(p=>{p.classList.remove('active')});
+  const el=document.getElementById(id);
+  if(el){el.classList.add('active');window.scrollTo(0,0)}
+}
+
+const viewTitles={uTasks:'المهام المتاحة',uBalance:'رصيدي',uEarnings:'سجل الأرباح',uWithdraw:'السحب',uAccount:'الحساب',aUsers:'المستخدمون',aAddTask:'إضافة المهام',aCompleted:'المهام المكتملة',aBalances:'الأرصدة',aWithdrawals:'طلبات السحب'};
+
+function switchView(link,dashId){
+  const dash=document.getElementById(dashId);
+  dash.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  link.classList.add('active');
+  const viewId=link.dataset.view;
+  dash.querySelectorAll('.dash-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  const titleEl=dashId==='dashUser'?'uViewTitle':'aViewTitle';
+  document.getElementById(titleEl).textContent=viewTitles[viewId]||'';
+  closeSidebar();
+  if(dashId==='dashUser') refreshUserDash();
+  else refreshAdminDash();
+}
+
+function toggleSidebar(id){
+  document.getElementById(id).classList.toggle('open');
+  document.getElementById('sbOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open'));
+  document.getElementById('sbOverlay').classList.remove('open');
+}
+
+/* ════════════════════════════════════════
+   AUTH
+   ════════════════════════════════════════ */
+let currentUser=null;
+
+function doRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const pass=document.getElementById('regPass').value;
+  const pass2=document.getElementById('regPass2').value;
+  if(!name||!email||!pass){return toast('جميع الحقول مطلوبة','error')}
+  if(pass.length<6){return toast('كلمة المرور 6 أحرف على الأقل','error')}
+  if(pass!==pass2){return toast('كلمتا المرور غير متطابقتين','error')}
+  const users=DB.get('users')||[];
+  if(users.find(u=>u.email===email)){return toast('البريد مسجّل مسبقاً','error')}
+  let nid=DB.get('nextUserId')||users.length+1;
+  const user={id:nid,name,email,pass,balance:0,totalEarned:0,pending:0,completedTasks:[]};
+  users.push(user);
+  DB.set('users',users);
+  DB.set('nextUserId',nid+1);
+  toast('تم إنشاء الحساب بنجاح!','success');
+  currentUser=user;
+  openUserDash();
+}
+
+function doLogin(){
+  const email=document.getElementById('logEmail').value.trim();
+  const pass=document.getElementById('logPass').value;
+  if(!email||!pass){return toast('أدخل البريد وكلمة المرور','error')}
+  const users=DB.get('users')||[];
+  const user=users.find(u=>u.email===email&&u.pass===pass);
+  if(!user){return toast('بيانات الدخول غير صحيحة','error')}
+  currentUser=user;
+  toast('مرحباً '+user.name+'!','success');
+  openUserDash();
+}
+
+function loginAdmin(){
+  currentUser=null;
+  showPage('dashAdmin');
+  document.getElementById('dashAdmin').classList.add('active');
+  refreshAdminDash();
+  toast('مرحباً بك في لوحة الإدارة','success');
+}
+
+function doLogout(){
+  currentUser=null;
+  showPage('pageLanding');
+  toast('تم تسجيل الخروج','info');
+}
+
+function openUserDash(){
+  showPage('dashUser');
+  document.getElementById('dashUser').classList.add('active');
+  const ini=currentUser.name.charAt(0);
+  document.getElementById('uAvatarSB').textContent=ini;
+  document.getElementById('uNameSB').textContent=currentUser.name;
+  document.getElementById('uEmailSB').textContent=currentUser.email;
+  refreshUserDash();
+}
+
+/* ════════════════════════════════════════
+   USER DASHBOARD LOGIC
+   ════════════════════════════════════════ */
+function getUser(){
+  if(!currentUser)return null;
+  const users=DB.get('users')||[];
+  return users.find(u=>u.id===currentUser.id)||currentUser;
+}
+function saveUser(u){
+  const users=DB.get('users')||[];
+  const idx=users.findIndex(x=>x.id===u.id);
+  if(idx>=0)users[idx]=u;
+  DB.set('users',users);
+  currentUser=u;
+}
+
+function refreshUserDash(){
+  const u=getUser();if(!u)return;
+  const tasks=DB.get('tasks')||[];
+  const earnings=(DB.get('earnings')||[]).filter(e=>e.userId===u.id);
+  const wds=(DB.get('withdrawals')||[]).filter(w=>w.userId===u.id);
+  const available=tasks.filter(t=>t.active&&!u.completedTasks.includes(t.id));
+
+  document.getElementById('uTotalTasks').textContent=available.length;
+  document.getElementById('uDoneTasks').textContent=u.completedTasks.length;
+  document.getElementById('uBalHead').textContent='$'+u.balance.toFixed(2);
+  document.getElementById('uBalVal').textContent='$'+u.balance.toFixed(2);
+  document.getElementById('uPendVal').textContent='$'+u.pending.toFixed(2);
+  document.getElementById('uTotalEarned').textContent='$'+u.totalEarned.toFixed(2);
+
+  // tasks list
+  const tl=document.getElementById('userTasksList');
+  if(available.length===0){
+    tl.innerHTML='<div class="empty-state"><i class="fa-solid fa-clipboard-check"></i><p>أكملت جميع المهام المتاحة حالياً!</p></div>';
+  }else{
+    tl.innerHTML=available.map(t=>`
+      <div class="task-card">
+        <div class="tc-top"><span class="badge badge-success">متاحة</span><span class="tc-reward">$${t.reward.toFixed(2)}</span></div>
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-desc">${t.desc}</div>
+        <div class="tc-footer"><span class="tc-meta"><i class="fa-solid fa-coins"></i> مكافأة فورية</span><button class="btn btn-accent btn-sm" onclick="completeTask(${t.id})"><i class="fa-solid fa-check"></i> إكمال</button></div>
+      </div>`).join('');
+  }
+
+  // earnings
+  const eb=document.getElementById('earningsBody');
+  if(earnings.length===0){eb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:32px">لا توجد أرباح بعد</td></tr>'}
+  else{eb.innerHTML=earnings.map(e=>`<tr><td>${e.taskTitle}</td><td style="color:var(--accent);font-weight:700">$${e.amount.toFixed(2)}</td><td>${e.date}</td><td><span class="badge badge-success">${e.status}</span></td></tr>`).join('')}
+
+  // withdraw history
+  const wb=document.getElementById('wdHistBody');
+  if(wds.length===0){wb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:32px">لا توجد طلبات سحب</td></tr>'}
+  else{
+    const mMap={paypal:'PayPal',usdt:'USDT',zain:'زين كاش',bank:'حوالة بنكية'};
+    wb.innerHTML=wds.map(w=>{
+      const bc=w.status==='مكتمل'?'badge-success':w.status==='مرفوض'?'badge-danger':'badge-warn';
+      return `<tr><td style="font-weight:700">$${w.amount}</td><td>${mMap[w.method]||w.method}</td><td>${w.date}</td><td><span class="badge ${bc}">${w.status}</span></td></tr>`;
+    }).join('');
+  }
+
+  // account
+  document.getElementById('uAvatarBig').textContent=u.name.charAt(0);
+  document.getElementById('uAccName').textContent=u.name;
+  document.getElementById('uAccEmail').textContent=u.email;
+  document.getElementById('accName').value=u.name;
+  document.getElementById('accEmail').value=u.email;
+}
+
+function completeTask(tid){
+  const u=getUser();if(!u)return;
+  const tasks=DB.get('tasks')||[];
+  const task=tasks.find(t=>t.id===tid);if(!task)return;
+  u.completedTasks.push(tid);
+  u.balance+=task.reward;
+  u.totalEarned+=task.reward;
+  saveUser(u);
+  const earnings=DB.get('earnings')||[];
+  earnings.push({userId:u.id,taskId:tid,taskTitle:task.title,amount:task.reward,date:new Date().toISOString().slice(0,10),status:'مكتمل'});
+  DB.set('earnings',earnings);
+  toast('تم إكمال المهمة! +$'+task.reward.toFixed(2),'success');
+  refreshUserDash();
+}
+
+function doWithdraw(){
+  const u=getUser();if(!u)return;
+  const amount=parseFloat(document.getElementById('wdAmount').value);
+  const method=document.getElementById('wdMethod').value;
+  const account=document.getElementById('wdAccount').value.trim();
+  if(!amount||amount<5){return toast('الحد الأدنى للسحب $5','error')}
+  if(amount>u.balance){return toast('رصيدك غير كافٍ','error')}
+  if(!account){return toast('أدخل رقم الحساب','error')}
+  u.balance-=amount;
+  u.pending+=amount;
+  saveUser(u);
+  const wds=DB.get('withdrawals')||[];
+  let nid=DB.get('nextWdId')||wds.length+1;
+  wds.push({id:nid,userId:u.id,userName:u.name,amount,method,account,date:new Date().toISOString().slice(0,10),status:'قيد المراجعة'});
+  DB.set('withdrawals',wds);
+  DB.set('nextWdId',nid+1);
+  document.getElementById('wdAmount').value='';
+  document.getElementById('wdAccount').value='';
+  toast('تم إرسال طلب السحب بنجاح','success');
+  refreshUserDash();
+}
+
+function saveAccount(){
+  const u=getUser();if(!u)return;
+  const name=document.getElementById('accName').value.trim();
+  const email=document.getElementById('accEmail').value.trim();
+  if(!name||!email){return toast('جميع الحقول مطلوبة','error')}
+  u.name=name;u.email=email;
+  saveUser(u);
+  document.getElementById('uAvatarSB').textContent=name.charAt(0);
+  document.getElementById('uNameSB').textContent=name;
+  document.getElementById('uEmailSB').textContent=email;
+  toast('تم حفظ التغييرات','success');
+  refreshUserDash();
+}
+
+/* ════════════════════════════════════════
+   ADMIN DASHBOARD LOGIC
+   ════════════════════════════════════════ */
+function refreshAdminDash(){
+  const users=DB.get('users')||[];
+  const tasks=DB.get('tasks')||[];
+  const earnings=DB.get('earnings')||[];
+  const wds=DB.get('withdrawals')||[];
+
+  // users
+  document.getElementById('aTotalUsers').textContent=users.length;
+  document.getElementById('aActiveUsers').textContent=users.filter(u=>u.completedTasks.length>0).length;
+  const ub=document.getElementById('adminUsersBody');
+  ub.innerHTML=users.map(u=>`<tr>
+    <td style="font-weight:600">${u.name}</td><td style="font-size:.82rem;color:var(--text2)">${u.email}</td>
+    <td style="color:var(--accent);font-weight:700">$${u.balance.toFixed(2)}</td><td>${u.completedTasks.length}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="fa-solid fa-trash"></i></button></td>
+  </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">لا يوجد مستخدمون</td></tr>';
+
+  // tasks
+  const tb=document.getElementById('adminTasksBody');
+  tb.innerHTML=tasks.map(t=>`<tr>
+    <td style="font-weight:600">${t.title}</td><td style="color:var(--accent);font-weight:700">$${t.reward.toFixed(2)}</td>
+    <td><span class="badge ${t.active?'badge-success':'badge-danger'}">${t.active?'مفعّلة':'معطّلة'}</span></td>
+    <td><button class="btn btn-outline btn-sm" onclick="toggleTask(${t.id})" style="margin-left:6px"><i class="fa-solid fa-${t.active?'pause':'play'}"></i></button><button class="btn btn-danger btn-sm" onclick="deleteTask(${t.id})"><i class="fa-solid fa-trash"></i></button></td>
+  </tr>`).join('');
+
+  // completed
+  const cb=document.getElementById('adminCompBody');
+  cb.innerHTML=earnings.map(e=>{
+    const usr=users.find(u=>u.id===e.userId);
+    return `<tr><td>${usr?usr.name:'محذوف'}</td><td>${e.taskTitle}</td><td style="color:var(--accent);font-weight:700">$${e.amount.toFixed(2)}</td><td>${e.date}</td></tr>`;
+  }).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:32px">لا توجد مهام مكتملة</td></tr>';
+
+  // balances
+  const totalPaid=wds.filter(w=>w.status==='مكتمل').reduce((s,w)=>s+w.amount,0);
+  const totalPend=wds.filter(w=>w.status==='قيد المراجعة').reduce((s,w)=>s+w.amount,0);
+  document.getElementById('aTotalPaid').textContent='$'+totalPaid;
+  document.getElementById('aTotalPending').textContent='$'+totalPend;
+  const bb=document.getElementById('adminBalBody');
+  bb.innerHTML=users.map(u=>{
+    const withdrawn=wds.filter(w=>w.userId===u.id&&w.status==='مكتمل').reduce((s,w)=>s+w.amount,0);
+    return `<tr><td style="font-weight:600">${u.name}</td><td style="color:var(--accent);font-weight:700">$${u.balance.toFixed(2)}</td><td>$${u.totalEarned.toFixed(2)}</td><td>$${withdrawn}</td></tr>`;
+  }).join('');
+
+  // withdrawals
+  const wd=document.getElementById('adminWdBody');
+  const mMap={paypal:'PayPal',usdt:'USDT',zain:'زين كاش',bank:'حوالة بنكية'};
+  wd.innerHTML=wds.map(w=>{
+    const bc=w.status==='مكتمل'?'badge-success':w.status==='مرفوض'?'badge-danger':'badge-warn';
+    const actions=w.status==='قيد المراجعة'?`<button class="btn btn-accent btn-sm" onclick="approveWd(${w.id})" style="margin-left:6px"><i class="fa-solid fa-check"></i></button><button class="btn btn-danger btn-sm" onclick="rejectWd(${w.id})"><i class="fa-solid fa-xmark"></i></button>`:'—';
+    return `<tr><td>${w.userName}</td><td style="font-weight:700">$${w.amount}</td><td>${mMap[w.method]||w.method}</td><td><span class="badge ${bc}">${w.status}</span></td><td>${actions}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">لا توجد طلبات</td></tr>';
+}
+
+function addTask(){
+  const title=document.getElementById('tTitle').value.trim();
+  const desc=document.getElementById('tDesc').value.trim();
+  const reward=parseFloat(document.getElementById('tReward').value);
+  const link=document.getElementById('tLink').value.trim();
+  if(!title||!desc||!reward){return toast('جميع الحقول مطلوبة','error')}
+  const tasks=DB.get('tasks')||[];
+  let nid=DB.get('nextTaskId')||tasks.length+1;
+  tasks.push({id:nid,title,desc,reward,active:true,link});
+  DB.set('tasks',tasks);DB.set('nextTaskId',nid+1);
+  ['tTitle','tDesc','tReward','tLink'].forEach(x=>document.getElementById(x).value='');
+  toast('تم إضافة المهمة بنجاح','success');
+  refreshAdminDash();
+}
+
+function toggleTask(id){
+  const tasks=DB.get('tasks')||[];
+  const t=tasks.find(x=>x.id===id);if(t){t.active=!t.active;DB.set('tasks',tasks);refreshAdminDash()}
+}
+
+function deleteTask(id){
+  if(!confirm('حذف هذه المهمة؟'))return;
+  DB.set('tasks',(DB.get('tasks')||[]).filter(t=>t.id!==id));
+  toast('تم حذف المهمة','info');refreshAdminDash();
+}
+
+function deleteUser(id){
+  if(!confirm('حذف هذا المستخدم؟'))return;
+  DB.set('users',(DB.get('users')||[]).filter(u=>u.id!==id));
+  toast('تم حذف المستخدم','info');refreshAdminDash();
+}
+
+function approveWd(id){
+  const wds=DB.get('withdrawals')||[];
+  const w=wds.find(x=>x.id===id);if(!w)return;
+  w.status='مكتمل';
+  const users=DB.get('users')||[];
+  const u=users.find(x=>x.id===w.userId);
+  if(u){u.pending=Math.max(0,u.pending-w.amount);DB.set('users',users)}
+  DB.set('withdrawals',wds);
+  toast('تمت الموافقة على طلب السحب','success');refreshAdminDash();
+}
+
+function rejectWd(id){
+  const wds=DB.get('withdrawals')||[];
+  const w=wds.find(x=>x.id===id);if(!w)return;
+  w.status='مرفوض';
+  const users=DB.get('users')||[];
+  const u=users.find(x=>x.id===w.userId);
+  if(u){u.balance+=w.amount;u.pending=Math.max(0,u.pending-w.amount);DB.set('users',users)}
+  DB.set('withdrawals',wds);
+  toast('تم رفض طلب السحب','error');refreshAdminDash();
+}
+
+/* ════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════ */
+window.addEventListener('load',()=>{
+  initData();
+  setTimeout(()=>document.getElementById('appLoader').classList.add('hide'),700);
+});
+
+// Navbar scroll
+window.addEventListener('scroll',()=>{
+  const n=document.getElementById('lNav');
+  if(n)n.classList.toggle('scrolled',window.scrollY>50);
+});
+
+// Reveal on scroll
+const rvObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');rvObs.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>rvObs.observe(el));
+</script>
+</body>
+</html>
